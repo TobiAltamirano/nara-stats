@@ -26,6 +26,9 @@ export interface DashboardStats {
     assists: number;
     steals: number;
     turnovers: number;
+    threePointers: number;
+    twoPointers: number;
+    freeThrows: number;
     rating: number;
   };
   records: {
@@ -35,20 +38,32 @@ export interface DashboardStats {
   };
 }
 
+export interface GameStatsInput {
+  teamScore: number;
+  opponentScore: number;
+  playerPoints?: number | null;
+  rebounds?: number | null;
+  assists?: number | null;
+  steals?: number | null;
+  turnovers?: number | null;
+  threePointers?: number | null;
+  twoPointers?: number | null;
+  freeThrows?: number | null;
+}
+
 /**
  * Fórmula provisoria de valoración para el MVP.
  * Suma aportes positivos y resta pérdidas. Si los datos son NULL, se tratan como 0.
  */
-export function calculateRating(game: Game): number {
+export function calculateRating(game: GameStatsInput): number {
   const pts = game.playerPoints ?? 0;
   const reb = game.rebounds ?? 0;
   const ast = game.assists ?? 0;
   const stl = game.steals ?? 0;
   const tov = game.turnovers ?? 0;
 
-  // Valoración simplificada: Pts + Reb + Ast + Rob - Pérdidas
-  const val = pts + reb + ast + stl - tov;
-  return Math.max(0, val);
+  // Fórmula simplificada de Valoración FEB / FIBA
+  return pts + reb + ast + stl - tov;
 }
 
 /**
@@ -81,6 +96,9 @@ export function calculateStats(gameList: Game[]): DashboardStats {
         assists: 0,
         steals: 0,
         turnovers: 0,
+        threePointers: 0,
+        twoPointers: 0,
+        freeThrows: 0,
         rating: 0,
       },
       records: { maxPoints: 0, maxRebounds: 0, maxAssists: 0 },
@@ -110,6 +128,9 @@ export function calculateStats(gameList: Game[]): DashboardStats {
     astCount = 0,
     stlCount = 0,
     tovCount = 0;
+  let threeCount = 0,
+    twoCount = 0,
+    ftCount = 0;
 
   // Récords
   let maxPoints = 0,
@@ -151,9 +172,18 @@ export function calculateStats(gameList: Game[]): DashboardStats {
       totalTov += g.turnovers;
       tovCount++;
     }
-    if (g.threePointers !== null) total3p += g.threePointers;
-    if (g.twoPointers !== null) total2p += g.twoPointers;
-    if (g.freeThrows !== null) totalFt += g.freeThrows;
+    if (g.threePointers !== null) {
+      total3p += g.threePointers;
+      threeCount++;
+    }
+    if (g.twoPointers !== null) {
+      total2p += g.twoPointers;
+      twoCount++;
+    }
+    if (g.freeThrows !== null) {
+      totalFt += g.freeThrows;
+      ftCount++;
+    }
 
     totalRating += calculateRating(g);
   }
@@ -193,6 +223,10 @@ export function calculateStats(gameList: Game[]): DashboardStats {
       assists: astCount > 0 ? Number((totalAst / astCount).toFixed(1)) : 0,
       steals: stlCount > 0 ? Number((totalStl / stlCount).toFixed(1)) : 0,
       turnovers: tovCount > 0 ? Number((totalTov / tovCount).toFixed(1)) : 0,
+      threePointers:
+        threeCount > 0 ? Number((total3p / threeCount).toFixed(1)) : 0,
+      twoPointers: twoCount > 0 ? Number((total2p / twoCount).toFixed(1)) : 0,
+      freeThrows: ftCount > 0 ? Number((totalFt / ftCount).toFixed(1)) : 0,
       rating: Number((totalRating / gamesPlayed).toFixed(1)),
     },
     records: {

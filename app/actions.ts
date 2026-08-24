@@ -165,3 +165,197 @@ export async function getOpponentDetail(opponentId: string) {
     games: gameList,
   };
 }
+
+// --- ABM DE OPONENTES ---
+
+// Crear un oponente
+export async function createOpponent(name: string) {
+  if (!name || !name.trim()) throw new Error("El nombre es obligatorio.");
+
+  const [existing] = await db
+    .select()
+    .from(opponents)
+    .where(ilike(opponents.name, name.trim()))
+    .limit(1);
+
+  if (existing) {
+    throw new Error("Ya existe un rival con ese nombre.");
+  }
+
+  await db.insert(opponents).values({ name: name.trim() });
+  revalidatePath("/settings");
+  revalidatePath("/opponents");
+  revalidatePath("/new-game");
+}
+
+// Editar un oponente
+export async function updateOpponent(id: string, name: string) {
+  if (!name || !name.trim()) throw new Error("El nombre es obligatorio.");
+
+  await db
+    .update(opponents)
+    .set({ name: name.trim() })
+    .where(eq(opponents.id, id));
+
+  revalidatePath("/settings");
+  revalidatePath("/opponents");
+  revalidatePath("/new-game");
+}
+
+// Eliminar un oponente
+export async function deleteOpponent(id: string) {
+  // Verificar si tiene partidos asociados
+  const gamesCount = await db
+    .select()
+    .from(games)
+    .where(eq(games.opponentId, id));
+
+  if (gamesCount.length > 0) {
+    throw new Error(
+      `No se puede eliminar: tiene ${gamesCount.length} partido(s) registrado(s).`,
+    );
+  }
+
+  await db.delete(opponents).where(eq(opponents.id, id));
+
+  revalidatePath("/settings");
+  revalidatePath("/opponents");
+  revalidatePath("/new-game");
+}
+
+// --- EDICIÓN Y ELIMINACIÓN DE PARTIDOS ---
+
+// Eliminar un partido
+export async function deleteGame(id: string) {
+  if (!id) throw new Error("ID de partido requerido.");
+
+  await db.delete(games).where(eq(games.id, id));
+
+  revalidatePath("/");
+  revalidatePath("/games");
+  revalidatePath("/opponents");
+}
+
+// Obtener partido por ID para editar
+export async function getGameById(id: string) {
+  const [game] = await db
+    .select({
+      id: games.id,
+      date: games.date,
+      location: games.location,
+      teamScore: games.teamScore,
+      opponentScore: games.opponentScore,
+      playerPoints: games.playerPoints,
+      rebounds: games.rebounds,
+      assists: games.assists,
+      steals: games.steals,
+      turnovers: games.turnovers,
+      threePointers: games.threePointers,
+      twoPointers: games.twoPointers,
+      freeThrows: games.freeThrows,
+      notes: games.notes,
+      opponentId: games.opponentId,
+      opponentName: opponents.name,
+    })
+    .from(games)
+    .innerJoin(opponents, eq(games.opponentId, opponents.id))
+    .where(eq(games.id, id))
+    .limit(1);
+
+  if (!game) throw new Error("Partido no encontrado.");
+  return game;
+}
+
+// Actualizar partido existente
+export async function updateGame(
+  id: string,
+  data: {
+    opponentName: string;
+    date: string;
+    location: "home" | "away";
+    teamScore: number;
+    opponentScore: number;
+    playerPoints?: number | null;
+    rebounds?: number | null;
+    assists?: number | null;
+    steals?: number | null;
+    turnovers?: number | null;
+    threePointers?: number | null;
+    twoPointers?: number | null;
+    freeThrows?: number | null;
+    notes?: string | null;
+  },
+) {
+  if (!id) throw new Error("ID de partido requerido.");
+
+  // 1. Buscar o crear rival si cambió el nombre
+  let [opponent] = await db
+    .select()
+    .from(opponents)
+    .where(ilike(opponents.name, data.opponentName.trim()))
+    .limit(1);
+
+  if (!opponent) {
+    [opponent] = await db
+      .insert(opponents)
+      .values({ name: data.opponentName.trim() })
+      .returning();
+  }
+
+  // 2. Actualizar partido
+  await db
+    .update(games)
+    .set({
+      opponentId: opponent.id,
+      date: data.date,
+      location: data.location,
+      teamScore: data.teamScore,
+      opponentScore: data.opponentScore,
+      playerPoints: data.playerPoints ?? null,
+      rebounds: data.rebounds ?? null,
+      assists: data.assists ?? null,
+      steals: data.steals ?? null,
+      turnovers: data.turnovers ?? null,
+      threePointers: data.threePointers ?? null,
+      twoPointers: data.twoPointers ?? null,
+      freeThrows: data.freeThrows ?? null,
+      notes: data.notes ?? null,
+    })
+    .where(eq(games.id, id));
+
+  revalidatePath("/");
+  revalidatePath("/games");
+  revalidatePath("/opponents");
+}
+
+/**
+ * Obtener listado completo de todos los partidos ordenados por fecha
+ */
+export async function getGamesList() {
+  const player = await getPrimaryPlayer();
+
+  const rawGames = await db
+    .select({
+      id: games.id,
+      date: games.date,
+      location: games.location,
+      teamScore: games.teamScore,
+      opponentScore: games.opponentScore,
+      playerPoints: games.playerPoints,
+      rebounds: games.rebounds,
+      assists: games.assists,
+      steals: games.steals,
+      turnovers: games.turnovers,
+      threePointers: games.threePointers,
+      twoPointers: games.twoPointers,
+      freeThrows: games.freeThrows,
+      notes: games.notes,
+      opponentName: opponents.name,
+    })
+    .from(games)
+    .innerJoin(opponents, eq(games.opponentId, opponents.id))
+    .where(eq(games.playerId, player.id))
+    .orderBy(desc(games.date));
+
+  return rawGames;
+}

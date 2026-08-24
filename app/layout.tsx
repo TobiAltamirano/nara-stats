@@ -1,13 +1,24 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import BottomNavigation from "@/components/BottomNavigation";
 import "./globals.css";
-import BottomNav from "@/components/bottom-nav";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Nara Stats — Seguimiento de Basketball",
-  description: "Estadísticas individuales y de equipo para Nara en Platense",
+  title: "Nara Stats",
+  description: "Estadísticas de básquet personalizadas",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Nara Stats",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ea580c",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -17,14 +28,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body
-        className={`${inter.className} bg-gray-100 min-h-screen text-gray-900`}
-      >
-        {/* Contenedor centralizado para emular App Mobile en Desktop */}
-        <div className="max-w-md mx-auto min-h-screen bg-white shadow-xl relative pb-20">
-          <main className="p-4">{children}</main>
-          <BottomNav />
-        </div>
+      <body className="bg-gray-100 text-gray-900 min-h-screen antialiased pb-20">
+        {children}
+        <BottomNavigation />
       </body>
     </html>
   );

@@ -8,9 +8,10 @@ export const revalidate = 0;
 export default async function OpponentDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>; // 👈 Actualizado a Promise
 }) {
-  const { opponent, stats, games } = await getOpponentDetail(params.id);
+  const { id } = await params; // 👈 Hacemos await de params
+  const { opponent, stats, games } = await getOpponentDetail(id);
 
   return (
     <div className="space-y-5 pb-6">
