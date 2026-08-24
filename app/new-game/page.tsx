@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createGame, getOpponentsList } from "@/app/actions";
+import Toast from "@/components/ui/Toast";
 
 interface OpponentOption {
   id: string;
@@ -15,6 +16,10 @@ export default function NewGamePage() {
   const [opponents, setOpponents] = useState<OpponentOption[]>([]);
   const [rawText, setRawText] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   // Estado del formulario
   const [formData, setFormData] = useState({
@@ -112,7 +117,10 @@ export default function NewGamePage() {
       !formData.teamScore ||
       !formData.opponentScore
     ) {
-      alert("Por favor completa los campos requeridos: Rival y Marcador.");
+      setToast({
+        message: "Completa los campos requeridos: Rival y Marcador.",
+        type: "error",
+      });
       return;
     }
 
@@ -142,17 +150,25 @@ export default function NewGamePage() {
         notes: formData.notes || null,
       });
 
-      router.push("/");
+      setToast({ message: "Partido guardado con éxito", type: "success" });
+      setTimeout(() => router.push("/"), 1000);
     } catch (err) {
       console.error(err);
-      alert("Error al guardar el partido.");
-    } finally {
+      setToast({ message: "Error al guardar el partido", type: "error" });
       setLoading(false);
     }
   };
 
   return (
     <div className="max-w-xl mx-auto p-4 pb-20">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Registrar Partido</h1>
         <button

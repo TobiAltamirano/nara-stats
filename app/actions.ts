@@ -123,6 +123,7 @@ export async function getDashboardData() {
     player,
     stats,
     recentGames: gameListWithOpponents.slice(0, 5), // Últimos 5 partidos con rival incluido
+    allGames: gameListWithOpponents, // Lista completa (desc por fecha) para filtros de tendencia en el dashboard
   };
 }
 
@@ -183,7 +184,6 @@ export async function createOpponent(name: string) {
   }
 
   await db.insert(opponents).values({ name: name.trim() });
-  revalidatePath("/settings");
   revalidatePath("/opponents");
   revalidatePath("/new-game");
 }
@@ -197,7 +197,6 @@ export async function updateOpponent(id: string, name: string) {
     .set({ name: name.trim() })
     .where(eq(opponents.id, id));
 
-  revalidatePath("/settings");
   revalidatePath("/opponents");
   revalidatePath("/new-game");
 }
@@ -218,7 +217,6 @@ export async function deleteOpponent(id: string) {
 
   await db.delete(opponents).where(eq(opponents.id, id));
 
-  revalidatePath("/settings");
   revalidatePath("/opponents");
   revalidatePath("/new-game");
 }
