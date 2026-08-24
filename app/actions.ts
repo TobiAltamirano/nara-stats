@@ -1,4 +1,4 @@
-"server";
+"use server";
 
 import { db } from "@/db";
 import { games, opponents, players } from "@/db/schema";
@@ -31,12 +31,12 @@ export async function getPrimaryPlayer() {
   const [player] = await db
     .select()
     .from(players)
-    .where(eq(players.name, "Nara"))
+    .where(eq(players.name, "Nara Diaz"))
     .limit(1);
 
   if (!player) {
     throw new Error(
-      "No se encontró a la jugadora 'Nara'. Corre 'npm run db:seed' primero.",
+      "No se encontró a la jugadora 'Nara Diaz'. Corre 'npm run db:seed' primero.",
     );
   }
 
@@ -96,26 +96,33 @@ export async function createGame(input: CreateGameInput) {
   return newGame;
 }
 
-/**
- * 3. Obtener el Dashboard General de Nara
- */
 export async function getDashboardData() {
   const player = await getPrimaryPlayer();
 
-  // Consultar todos los partidos de Nara
-  const gameList = await db
-    .select()
+  // Consultar partidos haciendo JOIN con la tabla opponents
+  const rawGames = await db
+    .select({
+      game: games,
+      opponent: opponents,
+    })
     .from(games)
+    .innerJoin(opponents, eq(games.opponentId, opponents.id))
     .where(eq(games.playerId, player.id))
     .orderBy(desc(games.date));
 
-  // Procesar métricas usando la función pura de lib/stats.ts
-  const stats = calculateStats(gameList);
+  // Formateamos para que cada partido incluya la propiedad 'opponent'
+  const gameListWithOpponents = rawGames.map(({ game, opponent }) => ({
+    ...game,
+    opponent,
+  }));
+
+  // Procesar métricas pasándole la lista de partidos
+  const stats = calculateStats(gameListWithOpponents);
 
   return {
     player,
     stats,
-    recentGames: gameList.slice(0, 5), // Últimos 5 partidos para el feed inicial
+    recentGames: gameListWithOpponents.slice(0, 5), // Últimos 5 partidos con rival incluido
   };
 }
 

@@ -53,7 +53,7 @@ export default function NewGamePage() {
       const score1 = parseInt(scoreMatch[1]);
       const score2 = parseInt(scoreMatch[2]);
 
-      // Si el texto indica "ganamos" o "perdimos", asignamos correctamente
+      // Si el texto indica "perdimos" o "derrota", asignamos correctamente
       if (lower.includes("perdimos") || lower.includes("derrota")) {
         updates.teamScore = Math.min(score1, score2).toString();
         updates.opponentScore = Math.max(score1, score2).toString();
