@@ -7,7 +7,7 @@ import { Trophy, Award, MapPin } from "lucide-react";
 type GameWithOpponent = Game & { opponent: { id: string; name: string } };
 
 interface DashboardStatsProps {
-  games: GameWithOpponent[]; // ordenados desc por fecha (más reciente primero)
+  games: GameWithOpponent[];
 }
 
 type FilterOption = "5" | "10" | "all";
@@ -26,23 +26,20 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
     return games.slice(0, Number(filter));
   }, [games, filter]);
 
-  const stats = useMemo(
-    () => calculateStats(filteredGames),
-    [filteredGames],
-  );
+  const stats = useMemo(() => calculateStats(filteredGames), [filteredGames]);
 
   return (
-    <div className="space-y-5">
-      {/* Filtro de tendencia */}
-      <div className="flex gap-1.5 bg-gray-200/70 p-1 rounded-xl">
+    <div className="space-y-6">
+      {/* Filtro de tendencia estilo píldora */}
+      <div className="flex gap-1.5 bg-[#DAD0C7]/50 p-1.5 rounded-full border border-[#DAD0C7]">
         {FILTERS.map((f) => (
           <button
             key={f.value}
             onClick={() => setFilter(f.value)}
-            className={`flex-1 text-[11px] font-bold py-1.5 rounded-lg transition ${
+            className={`flex-1 text-[11px] font-bold py-2 rounded-full transition ${
               filter === f.value
-                ? "bg-white text-orange-600 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-[#372D2E] text-[#F5F1F0] shadow-sm"
+                : "text-[#372D2E]/70 hover:text-[#372D2E]"
             }`}
           >
             {f.label}
@@ -51,40 +48,40 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
       </div>
 
       {/* BLOQUE 1: Resumen General del Equipo */}
-      <div>
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-          <Trophy className="w-3.5 h-3.5 text-orange-600" /> Resumen del Equipo
+      <div className="space-y-2">
+        <h2 className="font-bebas text-xl text-[#372D2E] tracking-wider uppercase flex items-center gap-1.5 px-1">
+          <Trophy className="w-4 h-4 text-[#372D2E]" /> Resumen del Equipo
         </h2>
-        <div className="grid grid-cols-4 gap-2 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm text-center">
+        <div className="grid grid-cols-4 gap-2 bg-[#DFD6CD]/60 p-4 rounded-3xl border border-[#DAD0C7] text-center">
           <div>
-            <span className="text-[10px] text-gray-400 font-semibold block">
+            <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
               PJ
             </span>
-            <span className="text-lg font-black text-gray-900">
+            <span className="font-bebas text-2xl text-[#372D2E] leading-tight">
               {stats.gamesPlayed}
             </span>
           </div>
           <div>
-            <span className="text-[10px] text-gray-400 font-semibold block">
+            <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
               G
             </span>
-            <span className="text-lg font-black text-green-600">
+            <span className="font-bebas text-2xl text-emerald-800 leading-tight">
               {stats.wins}
             </span>
           </div>
           <div>
-            <span className="text-[10px] text-gray-400 font-semibold block">
+            <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
               P
             </span>
-            <span className="text-lg font-black text-red-500">
+            <span className="font-bebas text-2xl text-rose-800 leading-tight">
               {stats.losses}
             </span>
           </div>
-          <div className="bg-orange-50 rounded-xl py-0.5">
-            <span className="text-[9px] text-orange-800 font-bold block uppercase">
-              Win Rate
+          <div className="bg-[#372D2E] text-[#F5F1F0] rounded-2xl py-1 flex flex-col justify-center items-center">
+            <span className="text-[9px] font-bold uppercase tracking-wider opacity-80">
+              Win %
             </span>
-            <span className="text-lg font-black text-orange-600">
+            <span className="font-bebas text-xl text-[#DFD6CD] leading-none">
               {stats.winRate}%
             </span>
           </div>
@@ -92,141 +89,143 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
       </div>
 
       {/* BLOQUE 2: Performance de Nara */}
-      <div>
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-          <Award className="w-3.5 h-3.5 text-orange-600" /> Performance de Nara
+      <div className="space-y-2">
+        <h2 className="font-bebas text-xl text-[#372D2E] tracking-wider uppercase flex items-center gap-1.5 px-1">
+          <Award className="w-4 h-4 text-[#372D2E]" /> Performance de Nara
         </h2>
 
-        {/* Promedios clave */}
-        <div className="grid grid-cols-4 gap-2 bg-gray-900 text-white p-3.5 rounded-2xl shadow-sm text-center">
+        {/* Promedios clave (Tarjeta Oscura Hero) */}
+        <div className="grid grid-cols-4 gap-2 bg-[#372D2E] text-[#F5F1F0] p-4 rounded-3xl text-center shadow-sm">
           <div>
-            <div className="text-lg font-black text-orange-400">
+            <div className="font-bebas text-3xl text-[#DFD6CD] leading-none">
               {stats.averages.points}
             </div>
-            <div className="text-[9px] text-zinc-400 font-medium uppercase">
+            <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
               PTS /PJ
             </div>
           </div>
           <div>
-            <div className="text-lg font-black text-white">
+            <div className="font-bebas text-3xl text-[#F5F1F0] leading-none">
               {stats.averages.rebounds}
             </div>
-            <div className="text-[9px] text-zinc-400 font-medium uppercase">
+            <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
               REB /PJ
             </div>
           </div>
           <div>
-            <div className="text-lg font-black text-white">
+            <div className="font-bebas text-3xl text-[#F5F1F0] leading-none">
               {stats.averages.assists}
             </div>
-            <div className="text-[9px] text-zinc-400 font-medium uppercase">
+            <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
               AST /PJ
             </div>
           </div>
           <div>
-            <div className="text-lg font-black text-green-400">
+            <div className="font-bebas text-3xl text-[#DFD6CD] leading-none">
               {stats.averages.rating}
             </div>
-            <div className="text-[9px] text-zinc-400 font-medium uppercase">
+            <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
               VAL /PJ
             </div>
           </div>
         </div>
 
-        {/* Promedios secundarios (antes faltantes) */}
-        <div className="grid grid-cols-4 gap-2 mt-2 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm text-center">
+        {/* Promedios secundarios */}
+        <div className="grid grid-cols-4 gap-2 bg-[#DFD6CD]/60 p-3.5 rounded-3xl border border-[#DAD0C7] text-center">
           <div>
-            <div className="text-sm font-black text-gray-800">
+            <div className="font-bebas text-xl text-[#372D2E]">
               {stats.averages.steals}
             </div>
-            <div className="text-[9px] text-gray-400 font-medium uppercase">
+            <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
               ROB /PJ
             </div>
           </div>
           <div>
-            <div className="text-sm font-black text-gray-800">
+            <div className="font-bebas text-xl text-[#372D2E]">
               {stats.averages.turnovers}
             </div>
-            <div className="text-[9px] text-gray-400 font-medium uppercase">
+            <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
               PÉRD /PJ
             </div>
           </div>
           <div>
-            <div className="text-sm font-black text-gray-800">
+            <div className="font-bebas text-xl text-[#372D2E]">
               {stats.averages.twoPointers}
             </div>
-            <div className="text-[9px] text-gray-400 font-medium uppercase">
+            <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
               2PT /PJ
             </div>
           </div>
           <div>
-            <div className="text-sm font-black text-gray-800">
+            <div className="font-bebas text-xl text-[#372D2E]">
               {stats.averages.freeThrows}
             </div>
-            <div className="text-[9px] text-gray-400 font-medium uppercase">
+            <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
               TL /PJ
             </div>
           </div>
         </div>
 
         {/* Totales y Récords secundarios */}
-        <div className="grid grid-cols-3 gap-2 mt-2">
-          <div className="bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm text-center">
-            <span className="text-[10px] text-gray-400 font-medium block">
+        <div className="grid grid-cols-3 gap-2">
+          <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
+            <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
               Máx. Puntos
             </span>
-            <span className="text-sm font-black text-gray-800">
-              {stats.records.maxPoints} pts
+            <span className="font-bebas text-xl text-[#372D2E]">
+              {stats.records.maxPoints}{" "}
+              <span className="text-xs font-sans">PTS</span>
             </span>
           </div>
-          <div className="bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm text-center">
-            <span className="text-[10px] text-gray-400 font-medium block">
+          <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
+            <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
               Triples Totales
             </span>
-            <span className="text-sm font-black text-gray-800">
+            <span className="font-bebas text-xl text-[#372D2E]">
               {stats.totals.threePointers} 🎯
             </span>
           </div>
-          <div className="bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm text-center">
-            <span className="text-[10px] text-gray-400 font-medium block">
+          <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
+            <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
               Total Puntos
             </span>
-            <span className="text-sm font-black text-gray-800">
-              {stats.totals.points} pts
+            <span className="font-bebas text-xl text-[#372D2E]">
+              {stats.totals.points}{" "}
+              <span className="text-xs font-sans">PTS</span>
             </span>
           </div>
         </div>
       </div>
 
       {/* BLOQUE 3: Local vs. Visitante */}
-      <div>
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-          <MapPin className="w-3.5 h-3.5 text-orange-600" /> Local vs. Visitante
+      <div className="space-y-2">
+        <h2 className="font-bebas text-xl text-[#372D2E] tracking-wider uppercase flex items-center gap-1.5 px-1">
+          <MapPin className="w-4 h-4 text-[#372D2E]" /> Local vs. Visitante
         </h2>
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="bg-[#DFD6CD]/60 p-4 rounded-3xl border border-[#DAD0C7]">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-bold text-gray-800">🏠 Local</span>
-              <span className="text-xs font-black text-orange-600">
+              <span className="text-xs font-bold text-[#372D2E]">🏠 Local</span>
+              <span className="font-bebas text-xl text-[#372D2E]">
                 {stats.homeStats.winRate}%
               </span>
             </div>
-            <div className="text-[11px] text-gray-500">
+            <div className="text-[11px] text-[#372D2E]/70 font-medium">
               {stats.homeStats.games} PJ ({stats.homeStats.wins}G -{" "}
               {stats.homeStats.losses}P)
             </div>
           </div>
 
-          <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="bg-[#DFD6CD]/60 p-4 rounded-3xl border border-[#DAD0C7]">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-xs font-bold text-gray-800">
+              <span className="text-xs font-bold text-[#372D2E]">
                 ✈️ Visitante
               </span>
-              <span className="text-xs font-black text-orange-600">
+              <span className="font-bebas text-xl text-[#372D2E]">
                 {stats.awayStats.winRate}%
               </span>
             </div>
-            <div className="text-[11px] text-gray-500">
+            <div className="text-[11px] text-[#372D2E]/70 font-medium">
               {stats.awayStats.games} PJ ({stats.awayStats.wins}G -{" "}
               {stats.awayStats.losses}P)
             </div>

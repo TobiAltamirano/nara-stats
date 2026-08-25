@@ -5,6 +5,8 @@ import { getGamesList, deleteGame } from "@/app/actions";
 import GameCard from "@/components/GameCard";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import Toast from "@/components/ui/Toast";
+import { Calendar, Plus } from "lucide-react";
+import Link from "next/link";
 
 export default function GamesPage() {
   const [gamesList, setGamesList] = useState<any[]>([]);
@@ -47,7 +49,7 @@ export default function GamesPage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-4 pb-24 space-y-4">
+    <div className="max-w-xl mx-auto p-4 space-y-6 pb-24">
       {toast && (
         <Toast
           message={toast.message}
@@ -67,22 +69,45 @@ export default function GamesPage() {
         onCancel={() => setDeletingId(null)}
       />
 
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Historial de Partidos
-        </h1>
-        <span className="text-xs font-semibold bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full">
-          {gamesList.length} partidos
-        </span>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider block">
+            Temporada Activa
+          </span>
+          <h1 className="text-3xl font-bebas tracking-wider text-[#372D2E] leading-none uppercase">
+            HISTORIAL DE PARTIDOS
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="bg-[#DFD6CD]/60 border border-[#DAD0C7] text-[#372D2E] text-xs font-bold px-3 py-1.5 rounded-2xl uppercase tracking-wider">
+            {gamesList.length} {gamesList.length === 1 ? "PJ" : "PJ"}
+          </span>
+          <Link
+            href="/new-game"
+            className="p-2.5 bg-[#372D2E] text-[#F5F1F0] rounded-2xl hover:opacity-90 transition flex items-center justify-center shadow-sm"
+          >
+            <Plus className="w-5 h-5 stroke-[2.5]" />
+          </Link>
+        </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-10 text-xs text-gray-400">
+        <div className="bg-[#DFD6CD]/40 border border-[#DAD0C7] rounded-3xl p-8 text-center text-xs font-bold text-[#372D2E]/50 uppercase tracking-wider">
           Cargando partidos...
         </div>
       ) : gamesList.length === 0 ? (
-        <div className="bg-white p-8 rounded-2xl border text-center text-gray-400 text-xs">
-          Aún no hay partidos registrados.
+        <div className="bg-[#DFD6CD]/40 border border-[#DAD0C7] p-8 rounded-3xl text-center space-y-3">
+          <Calendar className="w-8 h-8 text-[#372D2E]/40 mx-auto" />
+          <p className="text-xs font-bold text-[#372D2E]/60 uppercase tracking-wider">
+            Aún no hay partidos registrados.
+          </p>
+          <Link
+            href="/games/new"
+            className="inline-block bg-[#372D2E] text-[#F5F1F0] text-xs font-bebas tracking-wider px-4 py-2 rounded-xl uppercase"
+          >
+            Cargar Primer Partido
+          </Link>
         </div>
       ) : (
         <div className="space-y-3">

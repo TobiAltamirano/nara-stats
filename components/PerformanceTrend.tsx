@@ -15,7 +15,7 @@ import { calculateRating, type Game } from "@/lib/stats";
 type GameWithOpponent = Game & { opponent: { id: string; name: string } };
 
 interface PerformanceTrendProps {
-  games: GameWithOpponent[]; // ordenados desc por fecha (más reciente primero)
+  games: GameWithOpponent[];
 }
 
 type MetricKey =
@@ -30,8 +30,8 @@ type MetricKey =
   | "rating";
 
 const METRICS: { key: MetricKey; label: string; color: string }[] = [
-  { key: "rating", label: "Valoración", color: "#16a34a" },
-  { key: "points", label: "Puntos", color: "#ea580c" },
+  { key: "rating", label: "Valoración", color: "#372D2E" },
+  { key: "points", label: "Puntos", color: "#16a34a" },
   { key: "rebounds", label: "Rebotes", color: "#2563eb" },
   { key: "assists", label: "Asistencias", color: "#9333ea" },
   { key: "steals", label: "Robos", color: "#0891b2" },
@@ -52,7 +52,6 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
 
   const activeMetric = METRICS.find((m) => m.key === metric)!;
 
-  // El gráfico necesita orden cronológico ascendente (más viejo -> más nuevo)
   const chartData = useMemo(() => {
     const chronological = [...games].reverse();
     return chronological.map((g, i) => ({
@@ -66,7 +65,6 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
     }));
   }, [games, metric]);
 
-  // Promedio de la primera mitad vs segunda mitad para dar contexto de tendencia
   const trendHint = useMemo(() => {
     if (chartData.length < 4) return null;
     const mid = Math.floor(chartData.length / 2);
@@ -82,59 +80,66 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
 
   if (games.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-2xl border border-dashed border-gray-200 text-center text-xs text-gray-400">
+      <div className="bg-[#DAD0C7]/40 p-6 rounded-3xl border border-dashed border-[#DAD0C7] text-center text-xs text-[#372D2E]/70 font-medium">
         Todavía no hay partidos cargados para mostrar una tendencia.
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Selector de métrica */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
-        {METRICS.map((m) => (
-          <button
-            key={m.key}
-            onClick={() => setMetric(m.key)}
-            className={`shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
-              metric === m.key
-                ? "text-white shadow-sm"
-                : "bg-white text-gray-500 border border-gray-200 hover:text-gray-700"
-            }`}
-            style={metric === m.key ? { backgroundColor: m.color } : undefined}
-          >
-            {m.label}
-          </button>
-        ))}
+        {METRICS.map((m) => {
+          const isSelected = metric === m.key;
+          return (
+            <button
+              key={m.key}
+              onClick={() => setMetric(m.key)}
+              className={`shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition whitespace-nowrap border ${
+                isSelected
+                  ? "bg-[#372D2E] text-[#F5F1F0] border-[#372D2E] shadow-sm"
+                  : "bg-[#DFD6CD]/60 text-[#372D2E]/80 border-[#DAD0C7] hover:bg-[#DFD6CD]"
+              }`}
+            >
+              {m.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Gráfico */}
-      <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
+      <div className="bg-[#DFD6CD]/60 p-4 rounded-3xl border border-[#DAD0C7]">
         <div className="h-56">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
               margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f1f1" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#DAD0C7" />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 10, fill: "#9ca3af" }}
+                tick={{ fontSize: 10, fill: "#372D2E" }}
                 tickLine={false}
-                axisLine={{ stroke: "#e5e7eb" }}
+                axisLine={{ stroke: "#DAD0C7" }}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: "#9ca3af" }}
+                tick={{ fontSize: 10, fill: "#372D2E" }}
                 tickLine={false}
                 axisLine={false}
                 allowDecimals={false}
               />
               <Tooltip
                 contentStyle={{
+                  backgroundColor: "#372D2E",
+                  color: "#F5F1F0",
                   fontSize: 12,
-                  borderRadius: 12,
-                  border: "1px solid #e5e7eb",
+                  borderRadius: 16,
+                  border: "none",
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                 }}
+                itemStyle={{ color: "#DFD6CD" }}
+                labelStyle={{ color: "#F5F1F0", fontWeight: "bold" }}
                 labelFormatter={(label, payload) => {
                   const opp = payload?.[0]?.payload?.opponent;
                   return opp ? `${label} — vs ${opp}` : label;
@@ -144,36 +149,45 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={activeMetric.color}
-                strokeWidth={2.5}
-                dot={{ r: 3, fill: activeMetric.color }}
-                activeDot={{ r: 5 }}
+                stroke={
+                  activeMetric.color === "#372D2E"
+                    ? "#372D2E"
+                    : activeMetric.color
+                }
+                strokeWidth={3}
+                dot={{ r: 4, fill: "#372D2E" }}
+                activeDot={{
+                  r: 6,
+                  fill: "#DFD6CD",
+                  stroke: "#372D2E",
+                  strokeWidth: 2,
+                }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Contexto de tendencia: primera mitad vs segunda mitad */}
+      {/* Contexto de tendencia */}
       {trendHint && (
-        <div className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between text-xs">
-          <div className="text-gray-500">
-            Primera mitad:{" "}
-            <span className="font-bold text-gray-800">
+        <div className="bg-[#DFD6CD]/60 p-3.5 rounded-2xl border border-[#DAD0C7] flex items-center justify-between text-xs">
+          <div className="text-[#372D2E]/80 font-medium">
+            1ª mitad:{" "}
+            <span className="font-bebas text-lg text-[#372D2E]">
               {trendHint.firstAvg.toFixed(1)}
             </span>{" "}
-            → Segunda mitad:{" "}
-            <span className="font-bold text-gray-800">
+            → 2ª mitad:{" "}
+            <span className="font-bebas text-lg text-[#372D2E]">
               {trendHint.secondAvg.toFixed(1)}
             </span>
           </div>
           <span
-            className={`font-black px-2 py-0.5 rounded-md ${
+            className={`font-bebas text-lg px-2.5 py-0.5 rounded-full ${
               trendHint.delta > 0
-                ? "bg-green-50 text-green-600"
+                ? "bg-emerald-800 text-[#F5F1F0]"
                 : trendHint.delta < 0
-                  ? "bg-red-50 text-red-500"
-                  : "bg-gray-100 text-gray-500"
+                  ? "bg-rose-800 text-[#F5F1F0]"
+                  : "bg-[#372D2E] text-[#F5F1F0]"
             }`}
           >
             {trendHint.delta > 0 ? "+" : ""}

@@ -22,20 +22,23 @@ export default function Toast({ message, type, onClose }: ToastProps) {
       <div
         className={`flex items-center justify-between p-3.5 rounded-2xl shadow-xl border text-xs font-semibold ${
           type === "success"
-            ? "bg-gray-900 text-white border-zinc-800"
-            : "bg-red-600 text-white border-red-500"
+            ? "bg-[#372D2E] text-[#F5F1F0] border-[#DAD0C7]"
+            : "bg-red-700 text-[#F5F1F0] border-red-800"
         }`}
       >
         <div className="flex items-center gap-2.5">
           {type === "success" ? (
-            <CheckCircle2 className="w-4 h-4 text-green-400" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 stroke-[2.5]" />
           ) : (
-            <AlertCircle className="w-4 h-4 text-white" />
+            <AlertCircle className="w-4 h-4 text-red-200 stroke-[2.5]" />
           )}
-          <span>{message}</span>
+          <span className="tracking-wide">{message}</span>
         </div>
-        <button onClick={onClose} className="p-1 opacity-70 hover:opacity-100">
-          <X className="w-3.5 h-3.5" />
+        <button
+          onClick={onClose}
+          className="p-1 opacity-70 hover:opacity-100 transition"
+        >
+          <X className="w-3.5 h-3.5 stroke-[2.5]" />
         </button>
       </div>
     </div>

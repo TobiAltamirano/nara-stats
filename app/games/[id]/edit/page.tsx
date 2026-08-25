@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { getGameById, updateGame, getOpponentsList } from "@/app/actions";
 import Toast from "@/components/ui/Toast";
+import { ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
 
 export default function EditGamePage({
   params,
@@ -121,14 +122,14 @@ export default function EditGamePage({
 
   if (loading) {
     return (
-      <div className="max-w-xl mx-auto p-8 text-center text-xs text-gray-400">
+      <div className="max-w-xl mx-auto p-8 text-center bg-[#DFD6CD]/40 border border-[#DAD0C7] rounded-3xl mt-4 text-xs font-bold text-[#372D2E]/50 uppercase tracking-wider">
         Cargando datos del partido...
       </div>
     );
   }
 
   return (
-    <div className="max-w-xl mx-auto p-4 pb-20">
+    <div className="max-w-xl mx-auto p-4 pb-24 space-y-6">
       {toast && (
         <Toast
           message={toast.message}
@@ -137,22 +138,32 @@ export default function EditGamePage({
         />
       )}
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Editar Partido</h1>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="text-sm text-gray-500 hover:text-gray-700 font-medium"
-        >
-          Cancelar
-        </button>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="p-2 bg-[#DFD6CD]/50 border border-[#DAD0C7] text-[#372D2E] rounded-2xl hover:bg-[#DAD0C7] transition"
+          >
+            <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
+          </button>
+          <div>
+            <span className="text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider block">
+              Edición de Registro
+            </span>
+            <h1 className="text-3xl font-bebas tracking-wider text-[#372D2E] leading-none uppercase">
+              EDITAR PARTIDO
+            </h1>
+          </div>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Fecha y Localía */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-[#DFD6CD]/30 border border-[#DAD0C7] p-3 rounded-2xl">
+            <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-1">
               Fecha
             </label>
             <input
@@ -161,12 +172,12 @@ export default function EditGamePage({
               onChange={(e) =>
                 setFormData({ ...formData, date: e.target.value })
               }
-              className="w-full p-2.5 border rounded-xl text-sm"
+              className="w-full bg-transparent border-none p-0 text-sm font-semibold text-[#372D2E] focus:ring-0 outline-none"
               required
             />
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+          <div className="bg-[#DFD6CD]/30 border border-[#DAD0C7] p-3 rounded-2xl">
+            <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-1">
               Condición
             </label>
             <select
@@ -177,27 +188,28 @@ export default function EditGamePage({
                   location: e.target.value as "home" | "away",
                 })
               }
-              className="w-full p-2.5 border rounded-xl text-sm bg-white"
+              className="w-full bg-transparent border-none p-0 text-sm font-semibold text-[#372D2E] focus:ring-0 outline-none cursor-pointer"
             >
-              <option value="home">🏠 Local</option>
-              <option value="away">✈️ Visitante</option>
+              <option value="home">Local</option>
+              <option value="away">Visitante</option>
             </select>
           </div>
         </div>
 
         {/* Rival */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
+        <div className="bg-[#DFD6CD]/30 border border-[#DAD0C7] p-3 rounded-2xl">
+          <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-1">
             Rival *
           </label>
           <input
             type="text"
             list="opponents-list"
+            placeholder="Nombre del rival"
             value={formData.opponentName}
             onChange={(e) =>
               setFormData({ ...formData, opponentName: e.target.value })
             }
-            className="w-full p-2.5 border rounded-xl text-sm"
+            className="w-full bg-transparent border-none p-0 text-sm font-semibold text-[#372D2E] focus:ring-0 outline-none placeholder:text-[#372D2E]/40"
             required
           />
           <datalist id="opponents-list">
@@ -208,71 +220,82 @@ export default function EditGamePage({
         </div>
 
         {/* Marcador */}
-        <div className="grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-xl border">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Platense
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={formData.teamScore}
-              onChange={(e) =>
-                setFormData({ ...formData, teamScore: e.target.value })
-              }
-              className="w-full p-2 border rounded-lg text-lg font-bold text-center"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Rival
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={formData.opponentScore}
-              onChange={(e) =>
-                setFormData({ ...formData, opponentScore: e.target.value })
-              }
-              className="w-full p-2 border rounded-lg text-lg font-bold text-center"
-              required
-            />
+        <div className="bg-[#DFD6CD]/40 border border-[#DAD0C7] p-4 rounded-3xl space-y-2">
+          <span className="text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider block text-center">
+            Resultado Final
+          </span>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-[#F5F1F0] p-3 rounded-2xl border border-[#DAD0C7] text-center">
+              <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-1">
+                Platense
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.teamScore}
+                onChange={(e) =>
+                  setFormData({ ...formData, teamScore: e.target.value })
+                }
+                className="w-full bg-transparent border-none p-0 text-3xl font-bebas text-center text-[#372D2E] focus:ring-0 outline-none"
+                required
+              />
+            </div>
+            <div className="bg-[#F5F1F0] p-3 rounded-2xl border border-[#DAD0C7] text-center">
+              <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-1">
+                Rival
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.opponentScore}
+                onChange={(e) =>
+                  setFormData({ ...formData, opponentScore: e.target.value })
+                }
+                className="w-full bg-transparent border-none p-0 text-3xl font-bebas text-center text-[#372D2E] focus:ring-0 outline-none"
+                required
+              />
+            </div>
           </div>
         </div>
 
         {/* Puntos de Nara */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Puntos de Nara
+        <div className="bg-[#EAE4DC] border border-[#DAD0C7] p-4 rounded-3xl">
+          <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-1">
+            Puntos Individuales (Nara)
           </label>
           <input
             type="number"
             min="0"
+            placeholder="0"
             value={formData.playerPoints}
             onChange={(e) =>
               setFormData({ ...formData, playerPoints: e.target.value })
             }
-            className="w-full p-2.5 border rounded-xl text-sm"
+            className="w-full bg-transparent border-none p-0 text-2xl font-bebas text-[#372D2E] focus:ring-0 outline-none placeholder:text-[#372D2E]/30"
           />
         </div>
 
         {/* Estadísticas Avanzadas */}
-        <div className="border-t pt-3">
+        <div className="space-y-3 pt-2">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-xs font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1"
+            className="w-full bg-[#DFD6CD]/50 border border-[#DAD0C7] py-2.5 px-4 rounded-2xl text-xs font-bold text-[#372D2E] tracking-wider uppercase flex items-center justify-between hover:bg-[#DAD0C7] transition"
           >
-            {showAdvanced
-              ? "▲ Ocultar Estadísticas Avanzadas"
-              : "▼ + Ver Estadísticas Avanzadas"}
+            <span>Estadísticas Avanzadas</span>
+            {showAdvanced ? (
+              <ChevronUp className="w-4 h-4 stroke-[2.5]" />
+            ) : (
+              <ChevronDown className="w-4 h-4 stroke-[2.5]" />
+            )}
           </button>
 
           {showAdvanced && (
-            <div className="grid grid-cols-2 gap-3 mt-3 bg-gray-50 p-3 rounded-xl border">
-              <div>
-                <label className="block text-xs text-gray-600">Rebotes</label>
+            <div className="grid grid-cols-2 gap-3 bg-[#DFD6CD]/30 border border-[#DAD0C7] p-4 rounded-3xl">
+              <div className="bg-[#F5F1F0] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-0.5">
+                  Rebotes
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -280,11 +303,12 @@ export default function EditGamePage({
                   onChange={(e) =>
                     setFormData({ ...formData, rebounds: e.target.value })
                   }
-                  className="w-full p-2 border rounded-lg text-sm"
+                  className="w-full bg-transparent border-none p-0 text-sm font-semibold text-[#372D2E] focus:ring-0 outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-gray-600">
+
+              <div className="bg-[#F5F1F0] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-0.5">
                   Asistencias
                 </label>
                 <input
@@ -294,11 +318,14 @@ export default function EditGamePage({
                   onChange={(e) =>
                     setFormData({ ...formData, assists: e.target.value })
                   }
-                  className="w-full p-2 border rounded-lg text-sm"
+                  className="w-full bg-transparent border-none p-0 text-sm font-semibold text-[#372D2E] focus:ring-0 outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-gray-600">Robos</label>
+
+              <div className="bg-[#F5F1F0] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-0.5">
+                  Robos
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -306,11 +333,14 @@ export default function EditGamePage({
                   onChange={(e) =>
                     setFormData({ ...formData, steals: e.target.value })
                   }
-                  className="w-full p-2 border rounded-lg text-sm"
+                  className="w-full bg-transparent border-none p-0 text-sm font-semibold text-[#372D2E] focus:ring-0 outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-gray-600">Pérdidas</label>
+
+              <div className="bg-[#F5F1F0] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-0.5">
+                  Pérdidas
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -318,11 +348,12 @@ export default function EditGamePage({
                   onChange={(e) =>
                     setFormData({ ...formData, turnovers: e.target.value })
                   }
-                  className="w-full p-2 border rounded-lg text-sm"
+                  className="w-full bg-transparent border-none p-0 text-sm font-semibold text-[#372D2E] focus:ring-0 outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-gray-600">
+
+              <div className="bg-[#F5F1F0] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-0.5">
                   Triples Convertidos
                 </label>
                 <input
@@ -332,11 +363,12 @@ export default function EditGamePage({
                   onChange={(e) =>
                     setFormData({ ...formData, threePointers: e.target.value })
                   }
-                  className="w-full p-2 border rounded-lg text-sm"
+                  className="w-full bg-transparent border-none p-0 text-sm font-semibold text-[#372D2E] focus:ring-0 outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-gray-600">
+
+              <div className="bg-[#F5F1F0] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-0.5">
                   Dobles Convertidos
                 </label>
                 <input
@@ -346,11 +378,12 @@ export default function EditGamePage({
                   onChange={(e) =>
                     setFormData({ ...formData, twoPointers: e.target.value })
                   }
-                  className="w-full p-2 border rounded-lg text-sm"
+                  className="w-full bg-transparent border-none p-0 text-sm font-semibold text-[#372D2E] focus:ring-0 outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-gray-600">
+
+              <div className="bg-[#F5F1F0] p-2.5 rounded-2xl border border-[#DAD0C7] col-span-2">
+                <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-0.5">
                   Tiros Libres
                 </label>
                 <input
@@ -360,7 +393,7 @@ export default function EditGamePage({
                   onChange={(e) =>
                     setFormData({ ...formData, freeThrows: e.target.value })
                   }
-                  className="w-full p-2 border rounded-lg text-sm"
+                  className="w-full bg-transparent border-none p-0 text-sm font-semibold text-[#372D2E] focus:ring-0 outline-none"
                 />
               </div>
             </div>
@@ -368,8 +401,8 @@ export default function EditGamePage({
         </div>
 
         {/* Observaciones */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
+        <div className="bg-[#DFD6CD]/30 border border-[#DAD0C7] p-3 rounded-2xl">
+          <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider mb-1">
             Notas / Observaciones
           </label>
           <textarea
@@ -377,7 +410,7 @@ export default function EditGamePage({
             onChange={(e) =>
               setFormData({ ...formData, notes: e.target.value })
             }
-            className="w-full p-2 border rounded-xl text-sm resize-none"
+            className="w-full bg-transparent border-none p-0 text-sm font-medium text-[#372D2E] focus:ring-0 outline-none resize-none placeholder:text-[#372D2E]/40"
             rows={2}
           />
         </div>
@@ -385,7 +418,7 @@ export default function EditGamePage({
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-orange-600 text-white font-semibold py-3 rounded-xl shadow-md hover:bg-orange-700 transition disabled:opacity-50 mt-4 text-sm"
+          className="w-full bg-[#372D2E] text-[#F5F1F0] font-bebas text-lg tracking-wider py-3.5 rounded-2xl shadow-sm hover:opacity-90 transition disabled:opacity-50 uppercase mt-4"
         >
           {submitting ? "Guardando Cambios..." : "Guardar Cambios"}
         </button>
