@@ -17,13 +17,13 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Nara Stats",
+  title: "Platense Stats",
   description: "Estadísticas de básquet personalizadas",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Nara Stats",
+    title: "Platense Stats",
   },
 };
 
