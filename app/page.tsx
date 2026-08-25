@@ -81,7 +81,7 @@ export default async function HomePage() {
                     </span>
                     <div>
                       <div className="text-sm font-bold text-[#372D2E]">
-                        {game.location === "home" ? "vs" : "@"}{" "}
+                        {game.location === "home" ? "🏠" : "✈️"}{" "}
                         {game.opponent?.name || "Rival"}
                       </div>
                       <div className="text-[11px] text-[#372D2E]/70 font-medium">

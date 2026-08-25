@@ -71,7 +71,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               {stats.averages.points}
             </div>
             <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
-              PTS /PJ
+              Puntos/PJ
             </div>
           </div>
           <div title="Rebotes por Partido">
@@ -79,7 +79,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               {stats.averages.rebounds}
             </div>
             <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
-              REB /PJ
+              Rebotes/PJ
             </div>
           </div>
           <div title="Asistencias por Partido">
@@ -87,7 +87,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               {stats.averages.assists}
             </div>
             <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
-              AST /PJ
+              Asistencias/PJ
             </div>
           </div>
           <div title="Valoración / Eficiencia por Partido">
@@ -95,7 +95,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               {stats.averages.rating}
             </div>
             <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
-              VAL /PJ
+              Valoración/PJ
             </div>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               {stats.averages.steals}
             </div>
             <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
-              ROB /PJ
+              Robos/PJ
             </div>
           </div>
           <div title="Pérdidas de Balón por Partido">
@@ -115,7 +115,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               {stats.averages.turnovers}
             </div>
             <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
-              PÉRD /PJ
+              Pérdidas/PJ
             </div>
           </div>
           <div title="Dobles Convertidos por Partido">
@@ -123,7 +123,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               {stats.averages.twoPointers}
             </div>
             <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
-              2PT /PJ
+              Dobles/PJ
             </div>
           </div>
           <div title="Tiros Libres Convertidos por Partido">
@@ -131,7 +131,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               {stats.averages.freeThrows}
             </div>
             <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
-              TL /PJ
+              Tiros Libres/PJ
             </div>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
         <div className="grid grid-cols-2 xs:grid-cols-4 sm:grid-cols-4 gap-2">
           <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
             <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
-              Máx. Puntos
+              Máx. Puntos /PJ
             </span>
             <span className="font-bebas text-xl text-[#372D2E]">
               {stats.records.maxPoints}{" "}
