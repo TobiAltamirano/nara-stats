@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light only;
+
   --background: #f5f1f0;
   --foreground: #372d2e;
 
@@ -22,6 +24,10 @@
   --color-brand-accent-2: var(--brand-accent-2);
   --color-brand-accent-3: var(--brand-accent-3);
   --color-brand-accent-4: var(--brand-accent-4);
+}
+
+html {
+  background-color: var(--background);
 }
 
 body {
