@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createGame, getOpponentsList } from "@/app/actions";
 import Toast from "@/components/ui/Toast";
+import { ArrowLeft, Zap, ChevronDown, ChevronUp } from "lucide-react";
 
 interface OpponentOption {
   id: string;
@@ -23,7 +24,7 @@ export default function NewGamePage() {
 
   // Estado del formulario
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split("T")[0], // Fecha de hoy por defecto
+    date: new Date().toISOString().split("T")[0],
     opponentName: "",
     location: "home" as "home" | "away",
     teamScore: "",
@@ -58,18 +59,16 @@ export default function NewGamePage() {
       const score1 = parseInt(scoreMatch[1]);
       const score2 = parseInt(scoreMatch[2]);
 
-      // Si el texto indica "perdimos" o "derrota", asignamos correctamente
       if (lower.includes("perdimos") || lower.includes("derrota")) {
         updates.teamScore = Math.min(score1, score2).toString();
         updates.opponentScore = Math.max(score1, score2).toString();
       } else {
-        // Por defecto asumimos victoria
         updates.teamScore = Math.max(score1, score2).toString();
         updates.opponentScore = Math.min(score1, score2).toString();
       }
     }
 
-    // 2. Extraer Puntos de Nara (ej: "nara hizo 14", "14 pts", "14 puntos")
+    // 2. Extraer Puntos de Nara
     const ptsMatch =
       lower.match(/(?:nara\s*(?:hizo|anotó)?\s*)?(\d{1,2})\s*(?:pts|puntos)/) ||
       lower.match(/hizo\s*(\d{1,2})/);
@@ -77,19 +76,19 @@ export default function NewGamePage() {
       updates.playerPoints = ptsMatch[1];
     }
 
-    // 3. Extraer Rebotes (ej: "7 reb", "7 rebotes")
+    // 3. Extraer Rebotes
     const rebMatch = lower.match(/(\d{1,2})\s*(?:reb|rebotes)/);
     if (rebMatch) updates.rebounds = rebMatch[1];
 
-    // 4. Extraer Asistencias (ej: "3 ast", "3 asistencias")
+    // 4. Extraer Asistencias
     const astMatch = lower.match(/(\d{1,2})\s*(?:ast|asistencias)/);
     if (astMatch) updates.assists = astMatch[1];
 
-    // 5. Extraer Triples (ej: "2 triples", "2 3pt")
+    // 5. Extraer Triples
     const triMatch = lower.match(/(\d{1,2})\s*(?:triples|3pt|3p)/);
     if (triMatch) updates.threePointers = triMatch[1];
 
-    // 6. Detectar Rival (ej: "contra Lanús", "vs Obras")
+    // 6. Detectar Rival
     const vsMatch = text.match(
       /(?:contra|vs\.?|vsl)\s+([A-Za-zÁÉÍÓÚáéíóúÑñ\s]+?)(?:,|\.|$|\d)/i,
     );
@@ -160,7 +159,7 @@ export default function NewGamePage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-4 pb-20">
+    <div className="max-w-xl mx-auto p-4 space-y-6 pb-24">
       {toast && (
         <Toast
           message={toast.message}
@@ -169,35 +168,44 @@ export default function NewGamePage() {
         />
       )}
 
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Registrar Partido</h1>
+      {/* Header */}
+      <div className="flex items-center gap-3">
         <button
           onClick={() => router.back()}
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="p-3 bg-[#DFD6CD]/60 hover:bg-[#DFD6CD] rounded-2xl border border-[#DAD0C7] text-[#372D2E] transition flex items-center justify-center shrink-0"
         >
-          Cancelar
+          <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </button>
+        <div>
+          <span className="text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider block">
+            Nuevo partido
+          </span>
+          <h1 className="text-3xl font-bebas tracking-wider text-[#372D2E] leading-none uppercase">
+            REGISTRAR PARTIDO
+          </h1>
+        </div>
       </div>
 
-      {/* Box de Smart Parser (Efecto WhatsApp) */}
-      <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
-        <label className="block text-xs font-semibold text-orange-800 uppercase tracking-wider mb-1">
-          ⚡ Carga Rápida (Pegar texto de WhatsApp)
+      {/* Box Smart Parser */}
+      <div className="bg-[#DFD6CD]/60 p-5 rounded-3xl border border-[#DAD0C7]">
+        <label className="flex items-center gap-1.5 text-xs font-bold text-[#372D2E]/70 uppercase tracking-wider mb-2">
+          <Zap className="w-4 h-4 text-[#372D2E]" /> Carga Rápida (Pegar texto
+          de WhatsApp)
         </label>
         <textarea
           value={rawText}
           onChange={(e) => parseWhatsAppMessage(e.target.value)}
           placeholder='Ej: "Ganamos 72-65 contra Lanús, Nara hizo 14 pts, 7 rebotes y 2 triples"'
-          className="w-full text-sm p-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none bg-white resize-none"
+          className="w-full text-sm p-3 bg-[#DFD6CD] border border-[#DAD0C7] rounded-2xl text-[#372D2E] placeholder-[#372D2E]/40 focus:outline-none focus:ring-2 focus:ring-[#372D2E] resize-none"
           rows={2}
         />
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Fecha y Localía */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+        {/* Fecha y Condición */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-[#DFD6CD]/60 p-3.5 rounded-2xl border border-[#DAD0C7]">
+            <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase mb-1">
               Fecha
             </label>
             <input
@@ -206,13 +214,13 @@ export default function NewGamePage() {
               onChange={(e) =>
                 setFormData({ ...formData, date: e.target.value })
               }
-              className="w-full p-2 border rounded-lg text-sm"
+              className="w-full bg-[#DFD6CD] border border-[#DAD0C7] text-[#372D2E] text-xs font-bold p-2 rounded-xl focus:outline-none"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+          <div className="bg-[#DFD6CD]/60 p-3.5 rounded-2xl border border-[#DAD0C7]">
+            <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase mb-1">
               Condición
             </label>
             <select
@@ -223,7 +231,7 @@ export default function NewGamePage() {
                   location: e.target.value as "home" | "away",
                 })
               }
-              className="w-full p-2 border rounded-lg text-sm bg-white"
+              className="w-full bg-[#DFD6CD] border border-[#DAD0C7] text-[#372D2E] text-xs font-bold p-2 rounded-xl focus:outline-none"
             >
               <option value="home">🏠 Local</option>
               <option value="away">✈️ Visitante</option>
@@ -231,9 +239,9 @@ export default function NewGamePage() {
           </div>
         </div>
 
-        {/* Rival (Con Datalist autocompletado) */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
+        {/* Rival */}
+        <div className="bg-[#DFD6CD]/60 p-3.5 rounded-2xl border border-[#DAD0C7]">
+          <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase mb-1">
             Rival *
           </label>
           <input
@@ -244,7 +252,7 @@ export default function NewGamePage() {
               setFormData({ ...formData, opponentName: e.target.value })
             }
             placeholder="Ej: Lanús, Obras, Gimnasia"
-            className="w-full p-2 border rounded-lg text-sm"
+            className="w-full bg-[#DFD6CD] border border-[#DAD0C7] text-[#372D2E] text-sm font-bold p-2.5 rounded-xl focus:outline-none placeholder-[#372D2E]/40"
             required
           />
           <datalist id="opponents-list">
@@ -254,47 +262,52 @@ export default function NewGamePage() {
           </datalist>
         </div>
 
-        {/* Marcador */}
-        <div className="grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-xl border">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Platense
-            </label>
-            <input
-              type="number"
-              min="0"
-              placeholder="72"
-              value={formData.teamScore}
-              onChange={(e) =>
-                setFormData({ ...formData, teamScore: e.target.value })
-              }
-              className="w-full p-2 border rounded-lg text-lg font-bold text-center"
-              required
-            />
-          </div>
+        {/* Marcador Colectivo */}
+        <div className="bg-[#DFD6CD]/60 p-4 rounded-3xl border border-[#DAD0C7]">
+          <span className="text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider block mb-2">
+            Resultado del Partido
+          </span>
+          <div className="grid grid-cols-2 gap-3 text-center">
+            <div className="bg-[#DFD6CD] p-3 rounded-2xl border border-[#DAD0C7]">
+              <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase mb-1">
+                Platense
+              </label>
+              <input
+                type="number"
+                min="0"
+                placeholder="72"
+                value={formData.teamScore}
+                onChange={(e) =>
+                  setFormData({ ...formData, teamScore: e.target.value })
+                }
+                className="w-full bg-transparent text-center font-bebas text-3xl text-[#372D2E] focus:outline-none"
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Rival
-            </label>
-            <input
-              type="number"
-              min="0"
-              placeholder="65"
-              value={formData.opponentScore}
-              onChange={(e) =>
-                setFormData({ ...formData, opponentScore: e.target.value })
-              }
-              className="w-full p-2 border rounded-lg text-lg font-bold text-center"
-              required
-            />
+            <div className="bg-[#DFD6CD] p-3 rounded-2xl border border-[#DAD0C7]">
+              <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase mb-1">
+                Rival
+              </label>
+              <input
+                type="number"
+                min="0"
+                placeholder="65"
+                value={formData.opponentScore}
+                onChange={(e) =>
+                  setFormData({ ...formData, opponentScore: e.target.value })
+                }
+                className="w-full bg-transparent text-center font-bebas text-3xl text-[#372D2E] focus:outline-none"
+                required
+              />
+            </div>
           </div>
         </div>
 
         {/* Puntos de Nara */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
-            Puntos de Nara
+        <div className="bg-[#372D2E] text-[#F5F1F0] p-4 rounded-3xl shadow-sm">
+          <label className="block text-xs font-bold text-[#DFD6CD]/80 uppercase tracking-wider mb-2">
+            🏀 Puntos de Nara
           </label>
           <input
             type="number"
@@ -304,26 +317,35 @@ export default function NewGamePage() {
             onChange={(e) =>
               setFormData({ ...formData, playerPoints: e.target.value })
             }
-            className="w-full p-2 border rounded-lg text-sm"
+            className="w-full bg-[#DFD6CD]/10 border border-[#DFD6CD]/20 text-center font-bebas text-3xl text-[#DFD6CD] p-2 rounded-2xl focus:outline-none placeholder-[#DFD6CD]/30"
           />
         </div>
 
-        {/* Desplegable Estadísticas Avanzadas */}
-        <div className="border-t pt-3">
+        {/* Toggle Estadísticas Avanzadas */}
+        <div className="pt-1">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-xs font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1"
+            className="w-full flex items-center justify-between text-xs font-bold text-[#372D2E] bg-[#DFD6CD]/60 hover:bg-[#DFD6CD] p-3.5 rounded-2xl border border-[#DAD0C7] transition uppercase tracking-wider"
           >
-            {showAdvanced
-              ? "▲ Ocultar Estadísticas Avanzadas"
-              : "▼ + Agregar Rebotes, Asistencias, Triples..."}
+            <span>
+              {showAdvanced
+                ? "Ocultar Métrica Avanzada"
+                : "+ Agregar Rebotes, Asistencias, Triples..."}
+            </span>
+            {showAdvanced ? (
+              <ChevronUp className="w-4 h-4 text-[#372D2E]" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-[#372D2E]" />
+            )}
           </button>
 
           {showAdvanced && (
-            <div className="grid grid-cols-2 gap-3 mt-3 bg-gray-50 p-3 rounded-xl border">
-              <div>
-                <label className="block text-xs text-gray-600">Rebotes</label>
+            <div className="grid grid-cols-2 gap-2.5 mt-3 bg-[#DFD6CD]/60 p-4 rounded-3xl border border-[#DAD0C7]">
+              <div className="bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[9px] font-bold text-[#372D2E]/70 uppercase mb-0.5">
+                  Rebotes
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -331,12 +353,12 @@ export default function NewGamePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, rebounds: e.target.value })
                   }
-                  className="w-full p-1.5 border rounded text-sm"
+                  className="w-full bg-transparent font-bebas text-xl text-[#372D2E] focus:outline-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-gray-600">
+              <div className="bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[9px] font-bold text-[#372D2E]/70 uppercase mb-0.5">
                   Asistencias
                 </label>
                 <input
@@ -346,12 +368,14 @@ export default function NewGamePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, assists: e.target.value })
                   }
-                  className="w-full p-1.5 border rounded text-sm"
+                  className="w-full bg-transparent font-bebas text-xl text-[#372D2E] focus:outline-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-gray-600">Robos</label>
+              <div className="bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[9px] font-bold text-[#372D2E]/70 uppercase mb-0.5">
+                  Robos
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -359,12 +383,14 @@ export default function NewGamePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, steals: e.target.value })
                   }
-                  className="w-full p-1.5 border rounded text-sm"
+                  className="w-full bg-transparent font-bebas text-xl text-[#372D2E] focus:outline-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-gray-600">Pérdidas</label>
+              <div className="bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[9px] font-bold text-[#372D2E]/70 uppercase mb-0.5">
+                  Pérdidas
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -372,13 +398,13 @@ export default function NewGamePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, turnovers: e.target.value })
                   }
-                  className="w-full p-1.5 border rounded text-sm"
+                  className="w-full bg-transparent font-bebas text-xl text-[#372D2E] focus:outline-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-gray-600">
-                  Triples Convertidos
+              <div className="bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[9px] font-bold text-[#372D2E]/70 uppercase mb-0.5">
+                  Triples
                 </label>
                 <input
                   type="number"
@@ -387,13 +413,13 @@ export default function NewGamePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, threePointers: e.target.value })
                   }
-                  className="w-full p-1.5 border rounded text-sm"
+                  className="w-full bg-transparent font-bebas text-xl text-[#372D2E] focus:outline-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-gray-600">
-                  Dobles Convertidos
+              <div className="bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7]">
+                <label className="block text-[9px] font-bold text-[#372D2E]/70 uppercase mb-0.5">
+                  Dobles
                 </label>
                 <input
                   type="number"
@@ -402,12 +428,12 @@ export default function NewGamePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, twoPointers: e.target.value })
                   }
-                  className="w-full p-1.5 border rounded text-sm"
+                  className="w-full bg-transparent font-bebas text-xl text-[#372D2E] focus:outline-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-gray-600">
+              <div className="bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7] col-span-2">
+                <label className="block text-[9px] font-bold text-[#372D2E]/70 uppercase mb-0.5">
                   Tiros Libres
                 </label>
                 <input
@@ -417,7 +443,7 @@ export default function NewGamePage() {
                   onChange={(e) =>
                     setFormData({ ...formData, freeThrows: e.target.value })
                   }
-                  className="w-full p-1.5 border rounded text-sm"
+                  className="w-full bg-transparent font-bebas text-xl text-[#372D2E] focus:outline-none"
                 />
               </div>
             </div>
@@ -425,8 +451,8 @@ export default function NewGamePage() {
         </div>
 
         {/* Observaciones */}
-        <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1">
+        <div className="bg-[#DFD6CD]/60 p-3.5 rounded-2xl border border-[#DAD0C7]">
+          <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase mb-1">
             Notas / Observaciones
           </label>
           <textarea
@@ -435,17 +461,18 @@ export default function NewGamePage() {
               setFormData({ ...formData, notes: e.target.value })
             }
             placeholder="Ej: Jugó con molestia en el tobillo, gran último cuarto..."
-            className="w-full p-2 border rounded-lg text-sm resize-none"
+            className="w-full bg-[#DFD6CD] border border-[#DAD0C7] text-[#372D2E] text-xs p-2.5 rounded-xl focus:outline-none resize-none placeholder-[#372D2E]/40"
             rows={2}
           />
         </div>
 
+        {/* Botón Guardar */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-orange-600 text-white font-semibold py-3 rounded-xl shadow-md hover:bg-orange-700 transition disabled:opacity-50 mt-4"
+          className="w-full bg-[#372D2E] text-[#F5F1F0] font-bebas text-xl tracking-wider py-3.5 rounded-2xl shadow-sm hover:opacity-90 transition disabled:opacity-50 uppercase"
         >
-          {loading ? "Guardando..." : "Guardar Partido"}
+          {loading ? "GUARDANDO..." : "GUARDAR PARTIDO"}
         </button>
       </form>
     </div>

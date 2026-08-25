@@ -115,7 +115,7 @@ export default function OpponentsPage() {
   };
 
   return (
-    <div className="space-y-4 pb-6">
+    <div className="max-w-xl mx-auto p-4 space-y-6 pb-6">
       {toast && (
         <Toast
           message={toast.message}
@@ -135,54 +135,63 @@ export default function OpponentsPage() {
         onCancel={() => setDeletingId(null)}
       />
 
-      <div>
-        <h1 className="text-xl font-black text-gray-900">Rivales</h1>
-        <p className="text-xs text-gray-500">
-          Clubes enfrentados en la temporada
-        </p>
+      {/* Header Soft-Brutalist */}
+      <div className="flex items-center gap-3 bg-[#372D2E] text-[#F5F1F0] p-5 rounded-[32px] shadow-sm">
+        <div className="w-12 h-12 bg-[#DFD6CD] text-[#372D2E] rounded-full flex items-center justify-center shrink-0">
+          <Users className="w-6 h-6 stroke-[2.5]" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bebas tracking-wider text-[#F5F1F0] leading-none uppercase">
+            Rivales
+          </h1>
+          <p className="text-xs text-[#DFD6CD]/80 font-medium mt-0.5">
+            Clubes enfrentados en la temporada
+          </p>
+        </div>
       </div>
 
       {/* Alta rápida de rival */}
       <form
         onSubmit={handleCreate}
-        className="flex gap-2 bg-white p-2.5 rounded-2xl border border-gray-100 shadow-sm"
+        className="flex gap-2 bg-[#DFD6CD]/60 p-2.5 rounded-3xl border border-[#DAD0C7]"
       >
         <input
           type="text"
           placeholder="Nombre del nuevo rival..."
           value={newOpponentName}
           onChange={(e) => setNewOpponentName(e.target.value)}
-          className="flex-1 p-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="flex-1 bg-[#F5F1F0] px-4 py-2 rounded-2xl border border-[#DAD0C7] text-sm text-[#372D2E] placeholder-[#372D2E]/40 focus:outline-none focus:ring-2 focus:ring-[#372D2E]"
         />
         <button
           type="submit"
           disabled={creating || !newOpponentName.trim()}
-          className="bg-orange-600 text-white px-3 rounded-xl font-semibold text-xs flex items-center gap-1 hover:bg-orange-700 transition disabled:opacity-50"
+          className="bg-[#372D2E] text-[#F5F1F0] px-4 rounded-2xl font-bold text-xs flex items-center gap-1.5 hover:bg-[#372D2E]/90 transition disabled:opacity-50 shrink-0"
         >
           <Plus className="w-4 h-4" /> Agregar
         </button>
       </form>
 
+      {/* Listado de rivales */}
       {loading ? (
-        <div className="text-center py-10 text-xs text-gray-400">
+        <div className="text-center py-10 text-xs text-[#372D2E]/60 font-medium">
           Cargando rivales...
         </div>
       ) : opponents.length === 0 ? (
-        <div className="bg-white p-8 rounded-2xl border border-dashed border-gray-200 text-center">
-          <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-          <p className="text-sm font-medium text-gray-600">
+        <div className="bg-[#DAD0C7]/40 p-8 rounded-3xl border border-dashed border-[#DAD0C7] text-center space-y-2">
+          <Users className="w-8 h-8 text-[#372D2E]/40 mx-auto" />
+          <p className="text-sm font-bold text-[#372D2E]">
             Aún no hay rivales registrados.
           </p>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-[#372D2E]/60">
             Agregalo arriba, o se creará automáticamente al cargar un partido.
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {opponents.map((opp) => (
             <div
               key={opp.id}
-              className="bg-white p-3.5 rounded-2xl border border-gray-100 shadow-sm"
+              className="bg-[#DFD6CD]/60 p-4 rounded-3xl border border-[#DAD0C7] transition"
             >
               {editingOpponent?.id === opp.id ? (
                 <div className="flex items-center gap-2">
@@ -190,20 +199,20 @@ export default function OpponentsPage() {
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="flex-1 p-1.5 border rounded-lg text-sm"
+                    className="flex-1 bg-[#F5F1F0] p-2 rounded-xl border border-[#DAD0C7] text-sm text-[#372D2E] focus:outline-none"
                     autoFocus
                   />
                   <button
                     onClick={handleUpdate}
                     disabled={actionLoading}
-                    className="bg-green-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50"
+                    className="bg-emerald-700 text-[#F5F1F0] px-3 py-2 rounded-xl text-xs font-bold transition hover:bg-emerald-800 disabled:opacity-50"
                   >
                     Guardar
                   </button>
                   <button
                     onClick={() => setEditingOpponent(null)}
                     disabled={actionLoading}
-                    className="bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold"
+                    className="bg-[#DAD0C7] text-[#372D2E] px-3 py-2 rounded-xl text-xs font-bold transition hover:bg-[#DAD0C7]/80"
                   >
                     Cancelar
                   </button>
@@ -214,29 +223,29 @@ export default function OpponentsPage() {
                     href={`/opponents/${opp.id}`}
                     className="flex items-center gap-3 flex-1 min-w-0"
                   >
-                    <div className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center font-bold text-gray-700 text-sm shrink-0">
+                    <div className="w-10 h-10 bg-[#DAD0C7] rounded-2xl flex items-center justify-center text-base shrink-0 border border-[#DAD0C7]/80">
                       🆚
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-gray-900 truncate">
+                        <span className="text-base font-bold text-[#372D2E] truncate">
                           {opp.name}
                         </span>
                         {opp.wins + opp.losses > 0 && (
                           <span
-                            className={`text-[10px] font-black px-1.5 py-0.5 rounded-md shrink-0 ${
+                            className={`text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 text-[#F5F1F0] ${
                               opp.diff > 0
-                                ? "bg-green-50 text-green-600"
+                                ? "bg-emerald-700"
                                 : opp.diff < 0
-                                  ? "bg-red-50 text-red-500"
-                                  : "bg-gray-100 text-gray-500"
+                                  ? "bg-rose-700"
+                                  : "bg-[#372D2E]/70"
                             }`}
                           >
                             {opp.diff > 0 ? `+${opp.diff}` : opp.diff}
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] text-gray-400">
+                      <div className="text-xs font-semibold text-[#372D2E]/60">
                         {opp.wins + opp.losses > 0
                           ? `${opp.wins}G - ${opp.losses}P`
                           : "Ver historial de partidos"}
@@ -250,21 +259,21 @@ export default function OpponentsPage() {
                         setEditingOpponent(opp);
                         setEditName(opp.name);
                       }}
-                      className="p-1.5 text-gray-400 hover:text-orange-600 rounded-lg hover:bg-gray-50 transition"
+                      className="p-2 text-[#372D2E]/70 hover:text-[#372D2E] hover:bg-[#DAD0C7]/50 rounded-full transition"
                     >
-                      <Edit2 className="w-3.5 h-3.5" />
+                      <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setDeletingId(opp.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-gray-50 transition"
+                      className="p-2 text-rose-800/70 hover:text-rose-800 hover:bg-rose-100/60 rounded-full transition"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                     <Link
                       href={`/opponents/${opp.id}`}
-                      className="p-1.5 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                      className="p-2 text-[#372D2E]/70 hover:text-[#372D2E] hover:bg-[#DAD0C7]/50 rounded-full transition"
                     >
-                      <ChevronRight className="w-3.5 h-3.5" />
+                      <ChevronRight className="w-4 h-4" />
                     </Link>
                   </div>
                 </div>

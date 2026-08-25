@@ -32,26 +32,26 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
   const rating = calculateRating(game);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition">
+    <div className="bg-[#DFD6CD]/60 rounded-3xl border border-[#DAD0C7] overflow-hidden transition">
       {/* Cabecera Principal */}
       <div className="p-4 flex items-center justify-between">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-[10px] text-gray-400 font-medium">
+          <div className="flex items-center gap-2 text-[10px] text-[#372D2E]/70 font-semibold tracking-wide">
             <span>{new Date(game.date).toLocaleDateString("es-AR")}</span>
             <span>•</span>
-            <span className="uppercase font-bold text-gray-500">
+            <span className="uppercase font-bold">
               {game.location === "home" ? "🏠 Local" : "✈️ Visitante"}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <span
-              className={
-                isWin ? "text-green-600 font-bold" : "text-red-500 font-bold"
-              }
+              className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full text-[#F5F1F0] ${
+                isWin ? "bg-emerald-700" : "bg-rose-700"
+              }`}
             >
-              {isWin ? "🟢 VICTORIA" : "🔴 DERROTA"}
+              {isWin ? "VIC" : "DER"}
             </span>
-            <span className="text-sm font-black text-gray-900">
+            <span className="text-sm font-bold text-[#372D2E]">
               vs {game.opponentName} ({game.teamScore} - {game.opponentScore})
             </span>
           </div>
@@ -60,17 +60,17 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
         {/* Resumen Nara + Botón Desplegar */}
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <div className="text-base font-black text-gray-900">
+            <div className="font-bebas text-2xl text-[#372D2E] leading-none">
               {game.playerPoints ?? 0}{" "}
-              <span className="text-xs font-normal text-gray-500">pts</span>
+              <span className="text-xs font-sans text-[#372D2E]/70">pts</span>
             </div>
-            <div className="text-[10px] font-bold text-orange-600">
+            <div className="text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider">
               {rating} VAL
             </div>
           </div>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-50 rounded-xl transition"
+            className="p-2 text-[#372D2E] hover:bg-[#DAD0C7]/60 rounded-full transition"
           >
             {expanded ? (
               <ChevronUp className="w-5 h-5" />
@@ -83,65 +83,65 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
 
       {/* Detalles Desplegables */}
       {expanded && (
-        <div className="bg-gray-50/80 border-t border-gray-100 p-4 space-y-3 text-xs animate-fade-in">
+        <div className="bg-[#DAD0C7]/40 border-t border-[#DAD0C7] p-4 space-y-3 text-xs animate-fade-in">
           {/* Métricas Avanzadas */}
-          <div className="grid grid-cols-4 gap-2 text-center bg-white p-2.5 rounded-xl border border-gray-100">
+          <div className="grid grid-cols-4 gap-2 text-center bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7]">
             <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-semibold">
+              <span className="text-[9px] text-[#372D2E]/70 block uppercase font-bold">
                 Reb
               </span>
-              <span className="font-bold text-gray-800">
+              <span className="font-bebas text-lg text-[#372D2E]">
                 {game.rebounds ?? 0}
               </span>
             </div>
             <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-semibold">
+              <span className="text-[9px] text-[#372D2E]/70 block uppercase font-bold">
                 Ast
               </span>
-              <span className="font-bold text-gray-800">
+              <span className="font-bebas text-lg text-[#372D2E]">
                 {game.assists ?? 0}
               </span>
             </div>
             <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-semibold">
+              <span className="text-[9px] text-[#372D2E]/70 block uppercase font-bold">
                 Rob
               </span>
-              <span className="font-bold text-gray-800">
+              <span className="font-bebas text-lg text-[#372D2E]">
                 {game.steals ?? 0}
               </span>
             </div>
             <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-semibold">
+              <span className="text-[9px] text-[#372D2E]/70 block uppercase font-bold">
                 Pérd
               </span>
-              <span className="font-bold text-gray-800">
+              <span className="font-bebas text-lg text-[#372D2E]">
                 {game.turnovers ?? 0}
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 text-center bg-white p-2.5 rounded-xl border border-gray-100">
+          <div className="grid grid-cols-3 gap-2 text-center bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7]">
             <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-semibold">
+              <span className="text-[9px] text-[#372D2E]/70 block uppercase font-bold">
                 Triples
               </span>
-              <span className="font-bold text-gray-800">
+              <span className="font-bebas text-lg text-[#372D2E]">
                 {game.threePointers ?? 0}
               </span>
             </div>
             <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-semibold">
+              <span className="text-[9px] text-[#372D2E]/70 block uppercase font-bold">
                 Dobles
               </span>
-              <span className="font-bold text-gray-800">
+              <span className="font-bebas text-lg text-[#372D2E]">
                 {game.twoPointers ?? 0}
               </span>
             </div>
             <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-semibold">
+              <span className="text-[9px] text-[#372D2E]/70 block uppercase font-bold">
                 T. Libres
               </span>
-              <span className="font-bold text-gray-800">
+              <span className="font-bebas text-lg text-[#372D2E]">
                 {game.freeThrows ?? 0}
               </span>
             </div>
@@ -149,24 +149,24 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
 
           {/* Observaciones */}
           {game.notes && (
-            <div className="bg-white p-2.5 rounded-xl border border-gray-100 italic text-gray-600 text-[11px]">
+            <div className="bg-[#DFD6CD] p-3 rounded-2xl border border-[#DAD0C7] italic text-[#372D2E]/80 text-[11px]">
               "{game.notes}"
             </div>
           )}
 
           {/* Acciones Editar y Eliminar */}
-          <div className="flex justify-end items-center gap-2 pt-1 border-t border-gray-200/60">
+          <div className="flex justify-end items-center gap-2 pt-2 border-t border-[#DAD0C7]">
             <Link
               href={`/games/${game.id}/edit`}
-              className="flex items-center gap-1 text-[11px] font-semibold text-gray-600 hover:text-orange-600 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-2xs transition"
+              className="flex items-center gap-1 text-[11px] font-bold text-[#372D2E] bg-[#DFD6CD] hover:bg-[#DFD6CD]/80 px-3.5 py-1.5 rounded-full border border-[#DAD0C7] transition"
             >
-              <Edit2 className="w-3.5 h-3.5" /> Editar
+              <Edit2 className="w-3 h-3" /> Editar
             </Link>
             <button
               onClick={() => onDeleteRequest(game.id)}
-              className="flex items-center gap-1 text-[11px] font-semibold text-red-600 hover:bg-red-50 bg-white px-3 py-1.5 rounded-lg border border-red-100 shadow-2xs transition"
+              className="flex items-center gap-1 text-[11px] font-bold text-rose-800 bg-rose-100/60 hover:bg-rose-100 px-3.5 py-1.5 rounded-full border border-rose-200 transition"
             >
-              <Trash2 className="w-3.5 h-3.5" /> Eliminar
+              <Trash2 className="w-3 h-3" /> Eliminar
             </button>
           </div>
         </div>
