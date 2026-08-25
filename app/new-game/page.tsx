@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createGame, getOpponentsList } from "@/app/actions";
 import Toast from "@/components/ui/Toast";
-import { ArrowLeft, Zap, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  ArrowLeft,
+  Zap,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  Check,
+} from "lucide-react";
 
 interface OpponentOption {
   id: string;
@@ -17,6 +24,11 @@ export default function NewGamePage() {
   const [opponents, setOpponents] = useState<OpponentOption[]>([]);
   const [rawText, setRawText] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Estado para el combobox custom de rivales
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -43,6 +55,20 @@ export default function NewGamePage() {
   // Cargar lista de rivales para autocompletado
   useEffect(() => {
     getOpponentsList().then(setOpponents);
+  }, []);
+
+  // Cerrar el desplegable si se hace click fuera del componente
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Smart Parser (Estilo WhatsApp)
@@ -158,6 +184,11 @@ export default function NewGamePage() {
     }
   };
 
+  // Filtrado de equipos existentes
+  const filteredOpponents = opponents.filter((opp) =>
+    opp.name.toLowerCase().includes(formData.opponentName.toLowerCase()),
+  );
+
   return (
     <div className="max-w-xl mx-auto p-4 space-y-6 pb-24">
       {toast && (
@@ -189,8 +220,7 @@ export default function NewGamePage() {
       {/* Box Smart Parser */}
       <div className="bg-[#DFD6CD]/60 p-5 rounded-3xl border border-[#DAD0C7]">
         <label className="flex items-center gap-1.5 text-xs font-bold text-[#372D2E]/70 uppercase tracking-wider mb-2">
-          <Zap className="w-4 h-4 text-[#372D2E]" /> Carga Rápida (Pegar texto
-          de WhatsApp)
+          <Zap className="w-4 h-4 text-[#372D2E]" /> Carga Rápida
         </label>
         <textarea
           value={rawText}
@@ -239,27 +269,65 @@ export default function NewGamePage() {
           </div>
         </div>
 
-        {/* Rival */}
-        <div className="bg-[#DFD6CD]/60 p-3.5 rounded-2xl border border-[#DAD0C7]">
+        {/* Rival (Selector Personalizado con Búsqueda) */}
+        <div
+          className="bg-[#DFD6CD]/60 p-3.5 rounded-2xl border border-[#DAD0C7]"
+          ref={dropdownRef}
+        >
           <label className="block text-[10px] font-bold text-[#372D2E]/70 uppercase mb-1">
             Rival *
           </label>
-          <input
-            type="text"
-            list="opponents-list"
-            value={formData.opponentName}
-            onChange={(e) =>
-              setFormData({ ...formData, opponentName: e.target.value })
-            }
-            placeholder="Ej: Lanús, Obras, Gimnasia"
-            className="w-full bg-[#DFD6CD] border border-[#DAD0C7] text-[#372D2E] text-sm font-bold p-2.5 rounded-xl focus:outline-none placeholder-[#372D2E]/40"
-            required
-          />
-          <datalist id="opponents-list">
-            {opponents.map((opp) => (
-              <option key={opp.id} value={opp.name} />
-            ))}
-          </datalist>
+          <div className="relative">
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={formData.opponentName}
+                onFocus={() => setIsDropdownOpen(true)}
+                onChange={(e) => {
+                  setFormData({ ...formData, opponentName: e.target.value });
+                  setIsDropdownOpen(true);
+                }}
+                placeholder="Buscar o escribir rival (Ej: Lanús)"
+                className="w-full bg-[#DFD6CD] border border-[#DAD0C7] text-[#372D2E] text-sm font-bold p-2.5 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#372D2E] placeholder-[#372D2E]/40"
+                required
+              />
+              <div className="absolute right-3 text-[#372D2E]/60 pointer-events-none">
+                <Search className="w-4 h-4" />
+              </div>
+            </div>
+
+            {/* Menú Desplegable */}
+            {isDropdownOpen && (
+              <div className="absolute z-20 left-0 right-0 mt-2 bg-[#F5F1F0] border border-[#DAD0C7] rounded-2xl shadow-lg max-h-48 overflow-y-auto p-1.5 space-y-1">
+                {filteredOpponents.length > 0 ? (
+                  filteredOpponents.map((opp) => (
+                    <button
+                      key={opp.id}
+                      type="button"
+                      onClick={() => {
+                        setFormData({ ...formData, opponentName: opp.name });
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-[#372D2E] hover:bg-[#DFD6CD] rounded-xl flex items-center justify-between transition"
+                    >
+                      <span>{opp.name}</span>
+                      {formData.opponentName === opp.name && (
+                        <Check className="w-3.5 h-3.5 text-[#372D2E]" />
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-[11px] font-semibold text-[#372D2E]/60 text-center">
+                    Se creará &quot;
+                    <span className="font-bold text-[#372D2E]">
+                      {formData.opponentName}
+                    </span>
+                    &quot; como nuevo equipo
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Marcador Colectivo */}

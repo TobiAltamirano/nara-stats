@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { calculateStats, type Game } from "@/lib/stats";
 import { Trophy, Award, MapPin } from "lucide-react";
 
@@ -10,43 +10,11 @@ interface DashboardStatsProps {
   games: GameWithOpponent[];
 }
 
-type FilterOption = "5" | "10" | "all";
-
-const FILTERS: { value: FilterOption; label: string }[] = [
-  { value: "5", label: "Últimos 5" },
-  { value: "10", label: "Últimos 10" },
-  { value: "all", label: "Toda la temporada" },
-];
-
 export default function DashboardStats({ games }: DashboardStatsProps) {
-  const [filter, setFilter] = useState<FilterOption>("all");
-
-  const filteredGames = useMemo(() => {
-    if (filter === "all") return games;
-    return games.slice(0, Number(filter));
-  }, [games, filter]);
-
-  const stats = useMemo(() => calculateStats(filteredGames), [filteredGames]);
+  const stats = useMemo(() => calculateStats(games), [games]);
 
   return (
     <div className="space-y-6">
-      {/* Filtro de tendencia estilo píldora */}
-      <div className="flex gap-1.5 bg-[#DAD0C7]/50 p-1.5 rounded-full border border-[#DAD0C7]">
-        {FILTERS.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
-            className={`flex-1 text-[11px] font-bold py-2 rounded-full transition ${
-              filter === f.value
-                ? "bg-[#372D2E] text-[#F5F1F0] shadow-sm"
-                : "text-[#372D2E]/70 hover:text-[#372D2E]"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
       {/* BLOQUE 1: Resumen General del Equipo */}
       <div className="space-y-2">
         <h2 className="font-bebas text-xl text-[#372D2E] tracking-wider uppercase flex items-center gap-1.5 px-1">
@@ -90,13 +58,15 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
 
       {/* BLOQUE 2: Performance de Nara */}
       <div className="space-y-2">
-        <h2 className="font-bebas text-xl text-[#372D2E] tracking-wider uppercase flex items-center gap-1.5 px-1">
-          <Award className="w-4 h-4 text-[#372D2E]" /> Performance de Nara
-        </h2>
+        <div>
+          <h2 className="font-bebas text-xl text-[#372D2E] tracking-wider uppercase flex items-center gap-1.5 px-1">
+            <Award className="w-4 h-4 text-[#372D2E]" /> Performance
+          </h2>
+        </div>
 
         {/* Promedios clave (Tarjeta Oscura Hero) */}
         <div className="grid grid-cols-4 gap-2 bg-[#372D2E] text-[#F5F1F0] p-4 rounded-3xl text-center shadow-sm">
-          <div>
+          <div title="Puntos por Partido">
             <div className="font-bebas text-3xl text-[#DFD6CD] leading-none">
               {stats.averages.points}
             </div>
@@ -104,7 +74,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               PTS /PJ
             </div>
           </div>
-          <div>
+          <div title="Rebotes por Partido">
             <div className="font-bebas text-3xl text-[#F5F1F0] leading-none">
               {stats.averages.rebounds}
             </div>
@@ -112,7 +82,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               REB /PJ
             </div>
           </div>
-          <div>
+          <div title="Asistencias por Partido">
             <div className="font-bebas text-3xl text-[#F5F1F0] leading-none">
               {stats.averages.assists}
             </div>
@@ -120,7 +90,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               AST /PJ
             </div>
           </div>
-          <div>
+          <div title="Valoración / Eficiencia por Partido">
             <div className="font-bebas text-3xl text-[#DFD6CD] leading-none">
               {stats.averages.rating}
             </div>
@@ -132,7 +102,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
 
         {/* Promedios secundarios */}
         <div className="grid grid-cols-4 gap-2 bg-[#DFD6CD]/60 p-3.5 rounded-3xl border border-[#DAD0C7] text-center">
-          <div>
+          <div title="Robos de Balón por Partido">
             <div className="font-bebas text-xl text-[#372D2E]">
               {stats.averages.steals}
             </div>
@@ -140,7 +110,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               ROB /PJ
             </div>
           </div>
-          <div>
+          <div title="Pérdidas de Balón por Partido">
             <div className="font-bebas text-xl text-[#372D2E]">
               {stats.averages.turnovers}
             </div>
@@ -148,7 +118,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               PÉRD /PJ
             </div>
           </div>
-          <div>
+          <div title="Dobles Convertidos por Partido">
             <div className="font-bebas text-xl text-[#372D2E]">
               {stats.averages.twoPointers}
             </div>
@@ -156,7 +126,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               2PT /PJ
             </div>
           </div>
-          <div>
+          <div title="Tiros Libres Convertidos por Partido">
             <div className="font-bebas text-xl text-[#372D2E]">
               {stats.averages.freeThrows}
             </div>
@@ -166,8 +136,8 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
           </div>
         </div>
 
-        {/* Totales y Récords secundarios */}
-        <div className="grid grid-cols-3 gap-2">
+        {/* Totales y Récords secundarios (4 Tarjetas) */}
+        <div className="grid grid-cols-2 xs:grid-cols-4 sm:grid-cols-4 gap-2">
           <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
             <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
               Máx. Puntos
@@ -177,6 +147,16 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               <span className="text-xs font-sans">PTS</span>
             </span>
           </div>
+
+          <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
+            <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
+              Dobles Totales
+            </span>
+            <span className="font-bebas text-xl text-[#372D2E]">
+              {stats.totals.twoPointers} 🏀
+            </span>
+          </div>
+
           <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
             <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
               Triples Totales
@@ -185,6 +165,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
               {stats.totals.threePointers} 🎯
             </span>
           </div>
+
           <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
             <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
               Total Puntos
