@@ -85,7 +85,7 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
       {expanded && (
         <div className="bg-[#DAD0C7]/40 border-t border-[#DAD0C7] p-4 space-y-3 text-xs animate-fade-in">
           {/* Métricas Avanzadas */}
-          <div className="grid grid-cols-4 gap-2 text-center bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7]">
+          <div className="grid grid-cols-4 gap-2 text-center bg-[#E8E0DB] p-2.5 rounded-2xl border border-[#DAD0C7]">
             <div>
               <span className="text-[9px] text-[#372D2E]/70 block uppercase font-bold">
                 Reb
@@ -120,7 +120,7 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 text-center bg-[#DFD6CD] p-2.5 rounded-2xl border border-[#DAD0C7]">
+          <div className="grid grid-cols-3 gap-2 text-center bg-[#E8E0DB] p-2.5 rounded-2xl border border-[#DAD0C7]">
             <div>
               <span className="text-[9px] text-[#372D2E]/70 block uppercase font-bold">
                 Triples
@@ -149,7 +149,7 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
 
           {/* Observaciones */}
           {game.notes && (
-            <div className="bg-[#DFD6CD] p-3 rounded-2xl border border-[#DAD0C7] italic text-[#372D2E]/80 text-[11px]">
+            <div className="bg-[#E8E0DB] p-3 rounded-2xl border border-[#DAD0C7] italic text-[#372D2E]/80 text-[11px]">
               "{game.notes}"
             </div>
           )}
@@ -158,7 +158,7 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
           <div className="flex justify-end items-center gap-2 pt-2 border-t border-[#DAD0C7]">
             <Link
               href={`/games/${game.id}/edit`}
-              className="flex items-center gap-1 text-[11px] font-bold text-[#372D2E] bg-[#DFD6CD] hover:bg-[#DFD6CD]/80 px-3.5 py-1.5 rounded-full border border-[#DAD0C7] transition"
+              className="flex items-center gap-1 text-[11px] font-bold text-[#372D2E] bg-[#E8E0DB] hover:bg-[#E8E0DB]/80 px-3.5 py-1.5 rounded-full border border-[#DAD0C7] transition"
             >
               <Edit2 className="w-3 h-3" /> Editar
             </Link>

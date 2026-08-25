@@ -69,23 +69,31 @@ export default function GamesPage() {
         onCancel={() => setDeletingId(null)}
       />
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <span className="text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider block">
-            Temporada Activa
-          </span>
-          <h1 className="text-3xl font-bebas tracking-wider text-[#372D2E] leading-none uppercase">
-            HISTORIAL DE PARTIDOS
-          </h1>
+      {/* Header Soft-Brutalist */}
+      <div className="flex items-center justify-between bg-[#372D2E] text-[#F5F1F0] p-5 rounded-[32px] shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-[#DFD6CD] text-[#372D2E] rounded-full flex items-center justify-center shrink-0">
+            <Calendar className="w-6 h-6 stroke-[2.5]" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bebas tracking-wider text-[#F5F1F0] leading-none uppercase">
+              Partidos
+            </h1>
+            <p className="text-xs text-[#DFD6CD]/80 font-medium mt-0.5">
+              Historial de la temporada activa
+            </p>
+          </div>
         </div>
+
+        {/* Acciones del Header */}
         <div className="flex items-center gap-2">
-          <span className="bg-[#DFD6CD]/60 border border-[#DAD0C7] text-[#372D2E] text-xs font-bold px-3 py-1.5 rounded-2xl uppercase tracking-wider">
-            {gamesList.length} {gamesList.length === 1 ? "PJ" : "PJ"}
+          <span className="bg-[#DFD6CD]/20 text-[#DFD6CD] border border-[#DFD6CD]/30 text-xs font-bold px-3 p-2.5 rounded-2xl uppercase tracking-wider">
+            {gamesList.length} PJ
           </span>
           <Link
             href="/new-game"
-            className="p-2.5 bg-[#372D2E] text-[#F5F1F0] rounded-2xl hover:opacity-90 transition flex items-center justify-center shadow-sm"
+            className="p-2.5 bg-[#DFD6CD] text-[#372D2E] rounded-2xl hover:bg-[#F5F1F0] transition flex items-center justify-center shadow-sm"
+            title="Nuevo Partido"
           >
             <Plus className="w-5 h-5 stroke-[2.5]" />
           </Link>
@@ -103,7 +111,7 @@ export default function GamesPage() {
             Aún no hay partidos registrados.
           </p>
           <Link
-            href="/games/new"
+            href="/new-game"
             className="inline-block bg-[#372D2E] text-[#F5F1F0] text-xs font-bebas tracking-wider px-4 py-2 rounded-xl uppercase"
           >
             Cargar Primer Partido
