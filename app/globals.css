@@ -33,60 +33,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Patrón de arcos/líneas laterales retro */
-body::before,
-body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  width: min(45vw, 420px);
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.65;
-  background-image: repeating-radial-gradient(
-    circle at 50% 50%,
-    transparent 0,
-    transparent 18px,
-    #dad0c7 18px,
-    #dad0c7 28px,
-    transparent 28px,
-    transparent 44px
-  );
-}
-
-/* Arcos del lado izquierdo */
-body::before {
-  left: -200px;
-  background-position: center left;
-  mask-image: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 0, 0, 0.2)
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 0, 0, 0.2)
-  );
-}
-
-/* Arcos del lado derecho */
-body::after {
-  right: -200px;
-  background-position: center right;
-  mask-image: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 0, 0, 0.2)
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.8),
-    rgba(0, 0, 0, 0.2)
-  );
-}
-
 .font-bebas {
   font-family: var(--font-bebas), sans-serif;
 }
