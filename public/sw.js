@@ -10,7 +10,7 @@
 // una experiencia "shell offline" (abre sin pantalla blanca, muestra la última UI vista),
 // no sincronización de datos offline real.
 
-const CACHE_VERSION = "nara-stats-v1";
+const CACHE_VERSION = "nara-stats-v2";
 const APP_SHELL = [
   "/",
   "/games",
@@ -22,6 +22,8 @@ const APP_SHELL = [
   "/icon0.svg",
   "/apple-icon.png",
   "/icon1.png",
+  "/web-app-manifest-192x192.png",
+  "/web-app-manifest-512x512.png",
   "/offline.html",
 ];
 

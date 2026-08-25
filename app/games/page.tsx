@@ -113,7 +113,7 @@ export default function GamesPage() {
 
         {/* Acciones del Header */}
         <div className="flex items-center gap-2">
-          <span className="bg-[#DFD6CD]/20 text-[#DFD6CD] border border-[#DFD6CD]/30 text-xs font-bold px-3 p-2.5 rounded-2xl uppercase tracking-wider">
+          <span className="bg-[#DFD6CD]/20 text-[#DFD6CD] border border-[#DFD6CD]/30 text-xs font-bold px-3 p-3 rounded-2xl uppercase tracking-wider">
             {filteredGames.length} PJ
           </span>
           <Link
