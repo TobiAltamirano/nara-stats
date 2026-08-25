@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Plus_Jakarta_Sans } from "next/font/google";
 import BottomNavigation from "@/components/BottomNavigation";
 import RegisterServiceWorker from "@/components/RegisterServiceWorker";
-import BackgroundPattern from "@/components/BackgroundPattern";
 import "./globals.css";
 
 const bebasNeue = Bebas_Neue({
@@ -48,7 +47,6 @@ export default function RootLayout({
       className={`${bebasNeue.variable} ${plusJakartaSans.variable}`}
     >
       <body className="bg-[#F5F1F0] text-[#372D2E] font-sans min-h-screen antialiased pb-28 selection:bg-[#372D2E] selection:text-[#F5F1F0]">
-        <BackgroundPattern />
         {children}
         <BottomNavigation />
         <RegisterServiceWorker />
