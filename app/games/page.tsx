@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getGamesList, deleteGame } from "@/app/actions";
 import GameCard from "@/components/GameCard";
 import ConfirmModal from "@/components/ui/ConfirmModal";
@@ -13,6 +13,7 @@ export default function GamesPage() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<number | "all">("all");
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -47,6 +48,31 @@ export default function GamesPage() {
       setActionLoading(false);
     }
   };
+
+  // Temporadas (años) disponibles, de más reciente a más vieja
+  const seasons = useMemo(() => {
+    const years = new Set<number>();
+    for (const g of gamesList) years.add(new Date(g.date).getFullYear());
+    return Array.from(years).sort((a, b) => b - a);
+  }, [gamesList]);
+
+  const filteredGames = useMemo(() => {
+    if (selectedYear === "all") return gamesList;
+    return gamesList.filter(
+      (g) => new Date(g.date).getFullYear() === selectedYear,
+    );
+  }, [gamesList, selectedYear]);
+
+  // Agrupar los partidos filtrados por temporada, manteniendo el orden desc por fecha dentro de cada grupo
+  const groupedBySeason = useMemo(() => {
+    const groups = new Map<number, typeof filteredGames>();
+    for (const g of filteredGames) {
+      const year = new Date(g.date).getFullYear();
+      if (!groups.has(year)) groups.set(year, []);
+      groups.get(year)!.push(g);
+    }
+    return Array.from(groups.entries()).sort((a, b) => b[0] - a[0]);
+  }, [filteredGames]);
 
   return (
     <div className="max-w-xl mx-auto p-4 space-y-6 pb-24">
@@ -88,7 +114,7 @@ export default function GamesPage() {
         {/* Acciones del Header */}
         <div className="flex items-center gap-2">
           <span className="bg-[#DFD6CD]/20 text-[#DFD6CD] border border-[#DFD6CD]/30 text-xs font-bold px-3 p-2.5 rounded-2xl uppercase tracking-wider">
-            {gamesList.length} PJ
+            {filteredGames.length} PJ
           </span>
           <Link
             href="/new-game"
@@ -99,6 +125,35 @@ export default function GamesPage() {
           </Link>
         </div>
       </div>
+
+      {/* Filtro de temporada */}
+      {seasons.length > 1 && (
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+          <button
+            onClick={() => setSelectedYear("all")}
+            className={`shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition whitespace-nowrap border ${
+              selectedYear === "all"
+                ? "bg-[#372D2E] text-[#F5F1F0] border-[#372D2E] shadow-sm"
+                : "bg-[#DFD6CD]/60 text-[#372D2E]/80 border-[#DAD0C7] hover:bg-[#DFD6CD]"
+            }`}
+          >
+            Todas las temporadas
+          </button>
+          {seasons.map((year) => (
+            <button
+              key={year}
+              onClick={() => setSelectedYear(year)}
+              className={`shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition whitespace-nowrap border ${
+                selectedYear === year
+                  ? "bg-[#372D2E] text-[#F5F1F0] border-[#372D2E] shadow-sm"
+                  : "bg-[#DFD6CD]/60 text-[#372D2E]/80 border-[#DAD0C7] hover:bg-[#DFD6CD]"
+              }`}
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      )}
 
       {loading ? (
         <div className="bg-[#DFD6CD]/40 border border-[#DAD0C7] rounded-3xl p-8 text-center text-xs font-bold text-[#372D2E]/50 uppercase tracking-wider">
@@ -117,14 +172,37 @@ export default function GamesPage() {
             Cargar Primer Partido
           </Link>
         </div>
+      ) : filteredGames.length === 0 ? (
+        <div className="bg-[#DFD6CD]/40 border border-[#DAD0C7] p-8 rounded-3xl text-center">
+          <p className="text-xs font-bold text-[#372D2E]/60 uppercase tracking-wider">
+            No hay partidos en esta temporada.
+          </p>
+        </div>
       ) : (
-        <div className="space-y-3">
-          {gamesList.map((game) => (
-            <GameCard
-              key={game.id}
-              game={game}
-              onDeleteRequest={(id) => setDeletingId(id)}
-            />
+        <div className="space-y-8">
+          {groupedBySeason.map(([year, seasonGames]) => (
+            <div key={year} className="space-y-3">
+              {/* Corte visual por temporada */}
+              <div className="flex items-center gap-3 px-0.5">
+                <h2 className="font-bebas text-2xl tracking-wide text-[#372D2E] uppercase leading-none">
+                  Temporada {year}
+                </h2>
+                <span className="flex-1 h-px bg-[#DAD0C7]" />
+                <span className="text-[10px] font-bold text-[#372D2E]/50 uppercase tracking-wider shrink-0">
+                  {seasonGames.length} PJ
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {seasonGames.map((game) => (
+                  <GameCard
+                    key={game.id}
+                    game={game}
+                    onDeleteRequest={(id) => setDeletingId(id)}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
