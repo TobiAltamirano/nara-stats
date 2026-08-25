@@ -135,6 +135,48 @@ export async function getOpponentsList() {
 }
 
 /**
+ * 4b. Obtener rivales junto con su balance histórico (G-P) contra el equipo
+ */
+export async function getOpponentsWithRecord() {
+  const player = await getPrimaryPlayer();
+
+  const opponentsList = await db
+    .select()
+    .from(opponents)
+    .orderBy(opponents.name);
+
+  const playerGames = await db
+    .select({
+      opponentId: games.opponentId,
+      teamScore: games.teamScore,
+      opponentScore: games.opponentScore,
+    })
+    .from(games)
+    .where(eq(games.playerId, player.id));
+
+  const recordByOpponent = new Map<string, { wins: number; losses: number }>();
+  for (const g of playerGames) {
+    const record = recordByOpponent.get(g.opponentId) ?? {
+      wins: 0,
+      losses: 0,
+    };
+    if (g.teamScore > g.opponentScore) record.wins++;
+    else if (g.teamScore < g.opponentScore) record.losses++;
+    recordByOpponent.set(g.opponentId, record);
+  }
+
+  return opponentsList.map((opp) => {
+    const record = recordByOpponent.get(opp.id) ?? { wins: 0, losses: 0 };
+    return {
+      ...opp,
+      wins: record.wins,
+      losses: record.losses,
+      diff: record.wins - record.losses,
+    };
+  });
+}
+
+/**
  * 5. Obtener historial de un rival específico con sus estadísticas agregadas
  */
 export async function getOpponentDetail(opponentId: string) {

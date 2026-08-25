@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  getOpponentsList,
+  getOpponentsWithRecord,
   createOpponent,
   updateOpponent,
   deleteOpponent,
@@ -15,6 +15,9 @@ import { Users, ChevronRight, Plus, Edit2, Trash2 } from "lucide-react";
 interface Opponent {
   id: string;
   name: string;
+  wins: number;
+  losses: number;
+  diff: number;
 }
 
 export default function OpponentsPage() {
@@ -26,9 +29,7 @@ export default function OpponentsPage() {
   const [creating, setCreating] = useState(false);
 
   // Edición inline
-  const [editingOpponent, setEditingOpponent] = useState<Opponent | null>(
-    null,
-  );
+  const [editingOpponent, setEditingOpponent] = useState<Opponent | null>(null);
   const [editName, setEditName] = useState("");
 
   // Modal & Toast
@@ -41,7 +42,7 @@ export default function OpponentsPage() {
 
   const loadOpponents = async () => {
     try {
-      const list = await getOpponentsList();
+      const list = await getOpponentsWithRecord();
       setOpponents(list);
     } catch (err) {
       console.error(err);
@@ -173,8 +174,7 @@ export default function OpponentsPage() {
             Aún no hay rivales registrados.
           </p>
           <p className="text-xs text-gray-400">
-            Agregalo arriba, o se creará automáticamente al cargar un
-            partido.
+            Agregalo arriba, o se creará automáticamente al cargar un partido.
           </p>
         </div>
       ) : (
@@ -218,11 +218,28 @@ export default function OpponentsPage() {
                       🆚
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-bold text-gray-900 truncate">
-                        {opp.name}
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-gray-900 truncate">
+                          {opp.name}
+                        </span>
+                        {opp.wins + opp.losses > 0 && (
+                          <span
+                            className={`text-[10px] font-black px-1.5 py-0.5 rounded-md shrink-0 ${
+                              opp.diff > 0
+                                ? "bg-green-50 text-green-600"
+                                : opp.diff < 0
+                                  ? "bg-red-50 text-red-500"
+                                  : "bg-gray-100 text-gray-500"
+                            }`}
+                          >
+                            {opp.diff > 0 ? `+${opp.diff}` : opp.diff}
+                          </span>
+                        )}
                       </div>
                       <div className="text-[10px] text-gray-400">
-                        Ver historial de partidos
+                        {opp.wins + opp.losses > 0
+                          ? `${opp.wins}G - ${opp.losses}P`
+                          : "Ver historial de partidos"}
                       </div>
                     </div>
                   </Link>

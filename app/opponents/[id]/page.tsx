@@ -1,6 +1,6 @@
 import { getOpponentDetail } from "@/app/actions";
 import { calculateRating } from "@/lib/stats";
-import { Trophy, Award, ArrowLeft } from "lucide-react";
+import { Trophy, Award, ArrowLeft, BarChart3 } from "lucide-react";
 import Link from "next/link";
 
 export const revalidate = 0;
@@ -82,6 +82,80 @@ export default async function OpponentDetailPage({
             </div>
             <div className="text-[10px] text-zinc-400 uppercase font-medium">
               VAL / Partido
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Totales Históricos de Nara vs este rival */}
+      <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+          <BarChart3 className="w-3.5 h-3.5 text-orange-600" /> Totales
+          Históricos vs {opponent.name}
+        </div>
+        <div className="grid grid-cols-4 gap-2 text-center">
+          <div>
+            <div className="text-sm font-black text-gray-900">
+              {stats.totals.points}
+            </div>
+            <div className="text-[9px] text-gray-400 uppercase font-semibold">
+              Puntos
+            </div>
+          </div>
+          <div>
+            <div className="text-sm font-black text-gray-900">
+              {stats.totals.rebounds}
+            </div>
+            <div className="text-[9px] text-gray-400 uppercase font-semibold">
+              Rebotes
+            </div>
+          </div>
+          <div>
+            <div className="text-sm font-black text-gray-900">
+              {stats.totals.assists}
+            </div>
+            <div className="text-[9px] text-gray-400 uppercase font-semibold">
+              Asist.
+            </div>
+          </div>
+          <div>
+            <div className="text-sm font-black text-gray-900">
+              {stats.totals.steals}
+            </div>
+            <div className="text-[9px] text-gray-400 uppercase font-semibold">
+              Robos
+            </div>
+          </div>
+          <div>
+            <div className="text-sm font-black text-gray-900">
+              {stats.totals.turnovers}
+            </div>
+            <div className="text-[9px] text-gray-400 uppercase font-semibold">
+              Pérd.
+            </div>
+          </div>
+          <div>
+            <div className="text-sm font-black text-gray-900">
+              {stats.totals.threePointers}
+            </div>
+            <div className="text-[9px] text-gray-400 uppercase font-semibold">
+              Triples
+            </div>
+          </div>
+          <div>
+            <div className="text-sm font-black text-gray-900">
+              {stats.totals.twoPointers}
+            </div>
+            <div className="text-[9px] text-gray-400 uppercase font-semibold">
+              Dobles
+            </div>
+          </div>
+          <div>
+            <div className="text-sm font-black text-gray-900">
+              {stats.totals.freeThrows}
+            </div>
+            <div className="text-[9px] text-gray-400 uppercase font-semibold">
+              T. Libres
             </div>
           </div>
         </div>

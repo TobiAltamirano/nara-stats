@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Calendar, PlusCircle, Users } from "lucide-react";
+import { Home, Calendar, PlusCircle, Users, TrendingUp } from "lucide-react";
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -11,6 +11,7 @@ export default function BottomNav() {
     { name: "Inicio", href: "/", icon: Home },
     { name: "Partidos", href: "/games", icon: Calendar },
     { name: "Cargar", href: "/new-game", icon: PlusCircle, isPrimary: true },
+    { name: "Desempeño", href: "/performance", icon: TrendingUp },
     { name: "Rivales", href: "/opponents", icon: Users },
   ];
 
