@@ -3,7 +3,13 @@
 :root {
   color-scheme: light only;
 
-  --background: #f5f1f0;
+  /* Modificamos la variable de fondo para que apunte a tu imagen */
+  /* Asumimos que la imagen se llama bg-trama.webp y está en /public */
+  --background-image: url("/bg-trama.jpg");
+
+  /* Mantenemos el color plano como fallback por seguridad */
+  --background-color-fallback: #f5f1f0;
+
   --foreground: #372d2e;
 
   --brand-dark: #372d2e;
@@ -14,7 +20,8 @@
 }
 
 @theme inline {
-  --color-background: var(--background);
+  /* Usamos el color de fallback para la variable de color de fondo */
+  --color-background: var(--background-color-fallback);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-plus-jakarta), sans-serif;
   --font-bebas: var(--font-bebas), sans-serif;
@@ -27,11 +34,31 @@
 }
 
 html {
-  background-color: var(--background);
+  /* Establecemos el color de fondo de fallback aquí también */
+  background-color: var(--background-color-fallback);
 }
 
 body {
-  background-color: var(--background);
+  /* --- AJUSTES PARA EL FONDO CON IMAGEN --- */
+
+  /* 1. Combinamos el color de fallback y la imagen */
+  background-image: var(--background-image) !important;
+  background-color: var(--background-color-fallback);
+
+  /* 2. Aseguramos que la imagen cubra todo el fondo */
+  background-size: cover;
+
+  /* 3. Centramos la imagen */
+  background-position: center;
+
+  /* 4. Evitamos que la imagen se repita */
+  background-repeat: no-repeat;
+
+  /* 5. (Opcional) Fijamos el fondo para un efecto parallax suave al hacer scroll */
+  background-attachment: fixed;
+
+  /* --- FIN DE AJUSTES DE FONDO --- */
+
   color: var(--foreground);
   font-family: var(--font-plus-jakarta), sans-serif;
   min-height: 100vh;

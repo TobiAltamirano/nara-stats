@@ -48,7 +48,7 @@ export default function RootLayout({
       lang="es"
       className={`${bebasNeue.variable} ${plusJakartaSans.variable}`}
     >
-      <body className="bg-[#F5F1F0] text-[#372D2E] font-sans min-h-screen antialiased pb-28 selection:bg-[#372D2E] selection:text-[#F5F1F0]">
+      <body className="text-[#372D2E] font-sans min-h-screen antialiased pb-28 selection:bg-[#372D2E] selection:text-[#F5F1F0]">
         {children}
         <BottomNavigation />
         <RegisterServiceWorker />
