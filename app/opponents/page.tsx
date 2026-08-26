@@ -237,7 +237,7 @@ export default function OpponentsPage() {
                               opp.diff > 0
                                 ? "bg-emerald-700"
                                 : opp.diff < 0
-                                  ? "bg-rose-700"
+                                  ? "bg-[#AF0203]"
                                   : "bg-[#372D2E]/70"
                             }`}
                           >
@@ -265,7 +265,7 @@ export default function OpponentsPage() {
                     </button>
                     <button
                       onClick={() => setDeletingId(opp.id)}
-                      className="p-2 text-rose-800/70 hover:text-rose-800 hover:bg-rose-100/60 rounded-full transition"
+                      className="p-2 text-[#AF0203] hover:text-[#AF0203]/70 hover:bg-[#AF0203] rounded-full transition"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

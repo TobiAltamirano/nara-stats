@@ -313,7 +313,7 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
                   className={`flex items-center gap-0.5 text-xs font-bold px-1.5 py-1 rounded-full ${
                     card.delta > 0
                       ? "bg-emerald-800 text-[#F5F1F0]"
-                      : "bg-rose-800 text-[#F5F1F0]"
+                      : "bg-red-800 text-[#F5F1F0]"
                   }`}
                 >
                   {card.delta > 0 ? (

@@ -46,7 +46,7 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
           <div className="flex items-center gap-2">
             <span
               className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full text-[#F5F1F0] ${
-                isWin ? "bg-emerald-700" : "bg-rose-700"
+                isWin ? "bg-emerald-700" : "bg-red-700"
               }`}
             >
               {isWin ? "VIC" : "DER"}
@@ -164,7 +164,7 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
             </Link>
             <button
               onClick={() => onDeleteRequest(game.id)}
-              className="flex items-center gap-1 text-[11px] font-bold text-rose-800 bg-rose-100/60 hover:bg-rose-100 px-3.5 py-1.5 rounded-full border border-rose-200 transition"
+              className="flex items-center gap-1 text-[11px] font-bold text-red-800 bg-red-100/60 hover:bg-red-100 px-3.5 py-1.5 rounded-full border border-red-200 transition"
             >
               <Trash2 className="w-3 h-3" /> Eliminar
             </button>

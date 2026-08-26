@@ -74,7 +74,7 @@ export default async function HomePage() {
                   <div className="flex items-center gap-3">
                     <span
                       className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full text-[#F5F1F0] ${
-                        isWin ? "bg-emerald-700" : "bg-rose-700"
+                        isWin ? "bg-emerald-700" : "bg-red-700"
                       }`}
                     >
                       {isWin ? "VIC" : "DER"}

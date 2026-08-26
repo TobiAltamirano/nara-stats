@@ -53,7 +53,7 @@ export default async function OpponentDetailPage({
             </span>
             <span className="text-2xl font-bebas text-[#372D2E] leading-none">
               <span className="text-emerald-700">{stats.wins}G</span> -{" "}
-              <span className="text-rose-700">{stats.losses}P</span>
+              <span className="text-red-700">{stats.losses}P</span>
             </span>
           </div>
           <div className="bg-[#DFD6CD] p-3 rounded-2xl border border-[#DAD0C7]">
@@ -190,7 +190,7 @@ export default async function OpponentDetailPage({
                   <div className="flex items-center gap-2">
                     <span
                       className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full text-[#F5F1F0] ${
-                        isWin ? "bg-emerald-700" : "bg-rose-700"
+                        isWin ? "bg-emerald-700" : "bg-red-700"
                       }`}
                     >
                       {isWin ? "VIC" : "DER"}

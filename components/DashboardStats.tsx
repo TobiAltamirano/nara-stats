@@ -41,7 +41,7 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
             <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
               P
             </span>
-            <span className="font-bebas text-2xl text-rose-800 leading-tight">
+            <span className="font-bebas text-2xl text-red-800 leading-tight">
               {stats.losses}
             </span>
           </div>
