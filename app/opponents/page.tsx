@@ -15,9 +15,40 @@ import { Users, ChevronRight, Plus, Edit2, Trash2 } from "lucide-react";
 interface Opponent {
   id: string;
   name: string;
+  logoUrl?: string | null;
   wins: number;
   losses: number;
   diff: number;
+}
+
+// Helper para Renderizar Escudo con Fallback
+function OpponentLogo({
+  logoUrl,
+  name,
+}: {
+  logoUrl?: string | null;
+  name: string;
+}) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!logoUrl || hasError) {
+    return (
+      <div className="w-10 h-10 bg-[#DAD0C7] rounded-2xl flex items-center justify-center text-base shrink-0 border border-[#DAD0C7]/80">
+        🆚
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-10 h-10 bg-[#F5F1F0] rounded-2xl p-1 shrink-0 border border-[#DAD0C7] flex items-center justify-center overflow-hidden">
+      <img
+        src={logoUrl}
+        alt={`Logo de ${name}`}
+        onError={() => setHasError(true)}
+        className="w-full h-full object-contain"
+      />
+    </div>
+  );
 }
 
 export default function OpponentsPage() {
@@ -26,11 +57,13 @@ export default function OpponentsPage() {
 
   // Alta
   const [newOpponentName, setNewOpponentName] = useState("");
+  const [newOpponentLogo, setNewOpponentLogo] = useState("");
   const [creating, setCreating] = useState(false);
 
   // Edición inline
   const [editingOpponent, setEditingOpponent] = useState<Opponent | null>(null);
   const [editName, setEditName] = useState("");
+  const [editLogo, setEditLogo] = useState("");
 
   // Modal & Toast
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -61,8 +94,9 @@ export default function OpponentsPage() {
 
     setCreating(true);
     try {
-      await createOpponent(newOpponentName);
+      await createOpponent(newOpponentName, newOpponentLogo);
       setNewOpponentName("");
+      setNewOpponentLogo("");
       setToast({ message: "Rival agregado con éxito", type: "success" });
       await loadOpponents();
     } catch (err: any) {
@@ -80,9 +114,10 @@ export default function OpponentsPage() {
 
     setActionLoading(true);
     try {
-      await updateOpponent(editingOpponent.id, editName);
+      await updateOpponent(editingOpponent.id, editName, editLogo);
       setEditingOpponent(null);
       setEditName("");
+      setEditLogo("");
       setToast({ message: "Rival actualizado con éxito", type: "success" });
       await loadOpponents();
     } catch (err: any) {
@@ -135,7 +170,7 @@ export default function OpponentsPage() {
         onCancel={() => setDeletingId(null)}
       />
 
-      {/* Header Soft-Brutalist */}
+      {/* Header */}
       <div className="flex items-center gap-3 bg-[#372D2E] text-[#F5F1F0] p-5 rounded-[32px] shadow-sm">
         <div className="w-12 h-12 bg-[#DFD6CD] text-[#372D2E] rounded-full flex items-center justify-center shrink-0">
           <Users className="w-6 h-6 stroke-[2.5]" />
@@ -153,22 +188,31 @@ export default function OpponentsPage() {
       {/* Alta rápida de rival */}
       <form
         onSubmit={handleCreate}
-        className="flex gap-2 bg-[#DFD6CD]/60 p-2.5 rounded-3xl border border-[#DAD0C7]"
+        className="flex flex-col gap-2 bg-[#DFD6CD]/60 p-2.5 rounded-3xl border border-[#DAD0C7]"
       >
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Nombre del rival..."
+            value={newOpponentName}
+            onChange={(e) => setNewOpponentName(e.target.value)}
+            className="flex-1 bg-[#F5F1F0] px-4 py-2 rounded-2xl border border-[#DAD0C7] text-sm text-[#372D2E] placeholder-[#372D2E]/40 focus:outline-none focus:ring-2 focus:ring-[#372D2E]"
+          />
+          <button
+            type="submit"
+            disabled={creating || !newOpponentName.trim()}
+            className="bg-[#372D2E] text-[#F5F1F0] px-4 rounded-2xl font-bold text-xs flex items-center gap-1.5 hover:bg-[#372D2E]/90 transition disabled:opacity-50 shrink-0"
+          >
+            <Plus className="w-4 h-4" /> Agregar
+          </button>
+        </div>
         <input
-          type="text"
-          placeholder="Nombre del nuevo rival..."
-          value={newOpponentName}
-          onChange={(e) => setNewOpponentName(e.target.value)}
-          className="flex-1 bg-[#F5F1F0] px-4 py-2 rounded-2xl border border-[#DAD0C7] text-sm text-[#372D2E] placeholder-[#372D2E]/40 focus:outline-none focus:ring-2 focus:ring-[#372D2E]"
+          type="url"
+          placeholder="URL del escudo (opcional)..."
+          value={newOpponentLogo}
+          onChange={(e) => setNewOpponentLogo(e.target.value)}
+          className="bg-[#F5F1F0] px-4 py-1.5 rounded-xl border border-[#DAD0C7] text-xs text-[#372D2E] placeholder-[#372D2E]/40 focus:outline-none focus:ring-2 focus:ring-[#372D2E]"
         />
-        <button
-          type="submit"
-          disabled={creating || !newOpponentName.trim()}
-          className="bg-[#372D2E] text-[#F5F1F0] px-4 rounded-2xl font-bold text-xs flex items-center gap-1.5 hover:bg-[#372D2E]/90 transition disabled:opacity-50 shrink-0"
-        >
-          <Plus className="w-4 h-4" /> Agregar
-        </button>
       </form>
 
       {/* Listado de rivales */}
@@ -182,9 +226,6 @@ export default function OpponentsPage() {
           <p className="text-sm font-bold text-[#372D2E]">
             Aún no hay rivales registrados.
           </p>
-          <p className="text-xs text-[#372D2E]/60">
-            Agregalo arriba, o se creará automáticamente al cargar un partido.
-          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -194,28 +235,38 @@ export default function OpponentsPage() {
               className="bg-[#DFD6CD]/60 p-4 rounded-3xl border border-[#DAD0C7] transition"
             >
               {editingOpponent?.id === opp.id ? (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2">
                   <input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="flex-1 bg-[#F5F1F0] p-2 rounded-xl border border-[#DAD0C7] text-sm text-[#372D2E] focus:outline-none"
+                    placeholder="Nombre del rival"
+                    className="bg-[#F5F1F0] p-2 rounded-xl border border-[#DAD0C7] text-sm text-[#372D2E] focus:outline-none"
                     autoFocus
                   />
-                  <button
-                    onClick={handleUpdate}
-                    disabled={actionLoading}
-                    className="bg-emerald-700 text-[#F5F1F0] px-3 py-2 rounded-xl text-xs font-bold transition hover:bg-emerald-800 disabled:opacity-50"
-                  >
-                    Guardar
-                  </button>
-                  <button
-                    onClick={() => setEditingOpponent(null)}
-                    disabled={actionLoading}
-                    className="bg-[#DAD0C7] text-[#372D2E] px-3 py-2 rounded-xl text-xs font-bold transition hover:bg-[#DAD0C7]/80"
-                  >
-                    Cancelar
-                  </button>
+                  <input
+                    type="url"
+                    value={editLogo}
+                    onChange={(e) => setEditLogo(e.target.value)}
+                    placeholder="URL del escudo (opcional)"
+                    className="bg-[#F5F1F0] p-2 rounded-xl border border-[#DAD0C7] text-xs text-[#372D2E] focus:outline-none"
+                  />
+                  <div className="flex justify-end gap-2 mt-1">
+                    <button
+                      onClick={() => setEditingOpponent(null)}
+                      disabled={actionLoading}
+                      className="bg-[#DAD0C7] text-[#372D2E] px-3 py-1.5 rounded-xl text-xs font-bold transition hover:bg-[#DAD0C7]/80"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleUpdate}
+                      disabled={actionLoading}
+                      className="bg-emerald-700 text-[#F5F1F0] px-3 py-1.5 rounded-xl text-xs font-bold transition hover:bg-emerald-800 disabled:opacity-50"
+                    >
+                      Guardar
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
@@ -223,9 +274,7 @@ export default function OpponentsPage() {
                     href={`/opponents/${opp.id}`}
                     className="flex items-center gap-3 flex-1 min-w-0"
                   >
-                    <div className="w-10 h-10 bg-[#DAD0C7] rounded-2xl flex items-center justify-center text-base shrink-0 border border-[#DAD0C7]/80">
-                      🆚
-                    </div>
+                    <OpponentLogo logoUrl={opp.logoUrl} name={opp.name} />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-base font-bold text-[#372D2E] truncate">
@@ -258,6 +307,7 @@ export default function OpponentsPage() {
                       onClick={() => {
                         setEditingOpponent(opp);
                         setEditName(opp.name);
+                        setEditLogo(opp.logoUrl || "");
                       }}
                       className="p-2 text-[#372D2E]/70 hover:text-[#372D2E] hover:bg-[#DAD0C7]/50 rounded-full transition"
                     >

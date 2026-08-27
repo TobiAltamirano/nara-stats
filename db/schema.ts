@@ -24,6 +24,7 @@ export const players = pgTable("players", {
 export const opponents = pgTable("opponents", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 100 }).notNull().unique(),
+  logoUrl: text("logoUrl"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),

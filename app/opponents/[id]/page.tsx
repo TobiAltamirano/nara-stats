@@ -23,12 +23,26 @@ export default async function OpponentDetailPage({
         >
           <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
         </Link>
+
+        {/* Escudo Grande */}
+        <div className="w-12 h-12 bg-[#DFD6CD]/60 rounded-2xl border border-[#DAD0C7] flex items-center justify-center p-1 shrink-0 overflow-hidden">
+          {opponent.logoUrl ? (
+            <img
+              src={opponent.logoUrl}
+              alt={opponent.name}
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <span className="text-xl">🆚</span>
+          )}
+        </div>
+
         <div className="min-w-0">
           <span className="text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider block">
             Histórico VS
           </span>
           <h1 className="text-3xl font-bebas tracking-wider text-[#372D2E] leading-none truncate uppercase">
-            🆚 {opponent.name}
+            {opponent.name}
           </h1>
         </div>
       </div>

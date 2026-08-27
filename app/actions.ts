@@ -99,7 +99,7 @@ export async function createGame(input: CreateGameInput) {
 export async function getDashboardData() {
   const player = await getPrimaryPlayer();
 
-  // Consultar partidos haciendo JOIN con la tabla opponents
+  // Consultar partidos haciendo JOIN con la tabla opponents (incluye logoUrl de forma explícita)
   const rawGames = await db
     .select({
       game: games,
@@ -110,7 +110,7 @@ export async function getDashboardData() {
     .where(eq(games.playerId, player.id))
     .orderBy(desc(games.date));
 
-  // Formateamos para que cada partido incluya la propiedad 'opponent'
+  // Formateamos para que cada partido incluya el objeto 'opponent' completo
   const gameListWithOpponents = rawGames.map(({ game, opponent }) => ({
     ...game,
     opponent,
@@ -122,8 +122,8 @@ export async function getDashboardData() {
   return {
     player,
     stats,
-    recentGames: gameListWithOpponents.slice(0, 5), // Últimos 5 partidos con rival incluido
-    allGames: gameListWithOpponents, // Lista completa (desc por fecha) para filtros de tendencia en el dashboard
+    recentGames: gameListWithOpponents.slice(0, 5),
+    allGames: gameListWithOpponents,
   };
 }
 
@@ -182,7 +182,7 @@ export async function getOpponentsWithRecord() {
 export async function getOpponentDetail(opponentId: string) {
   const player = await getPrimaryPlayer();
 
-  // Datos del rival
+  // Datos del rival (retorna el objeto opponent completo, incluyendo logoUrl)
   const [opponent] = await db
     .select()
     .from(opponents)
@@ -211,32 +211,49 @@ export async function getOpponentDetail(opponentId: string) {
 
 // --- ABM DE OPONENTES ---
 
-// Crear un oponente
-export async function createOpponent(name: string) {
+// Crear un oponente (Acepta logoUrl opcional)
+export async function createOpponent(name: string, logoUrl?: string | null) {
   if (!name || !name.trim()) throw new Error("El nombre es obligatorio.");
+
+  const cleanName = name.trim();
+  const cleanLogoUrl = logoUrl?.trim() || null;
 
   const [existing] = await db
     .select()
     .from(opponents)
-    .where(ilike(opponents.name, name.trim()))
+    .where(ilike(opponents.name, cleanName))
     .limit(1);
 
   if (existing) {
     throw new Error("Ya existe un rival con ese nombre.");
   }
 
-  await db.insert(opponents).values({ name: name.trim() });
+  await db.insert(opponents).values({
+    name: cleanName,
+    logoUrl: cleanLogoUrl,
+  });
+
   revalidatePath("/opponents");
   revalidatePath("/new-game");
 }
 
-// Editar un oponente
-export async function updateOpponent(id: string, name: string) {
+// Editar un oponente (Acepta logoUrl opcional)
+export async function updateOpponent(
+  id: string,
+  name: string,
+  logoUrl?: string | null,
+) {
   if (!name || !name.trim()) throw new Error("El nombre es obligatorio.");
+
+  const cleanName = name.trim();
+  const cleanLogoUrl = logoUrl?.trim() || null;
 
   await db
     .update(opponents)
-    .set({ name: name.trim() })
+    .set({
+      name: cleanName,
+      logoUrl: cleanLogoUrl,
+    })
     .where(eq(opponents.id, id));
 
   revalidatePath("/opponents");
@@ -245,7 +262,6 @@ export async function updateOpponent(id: string, name: string) {
 
 // Eliminar un oponente
 export async function deleteOpponent(id: string) {
-  // Verificar si tiene partidos asociados
   const gamesCount = await db
     .select()
     .from(games)
@@ -296,6 +312,7 @@ export async function getGameById(id: string) {
       notes: games.notes,
       opponentId: games.opponentId,
       opponentName: opponents.name,
+      opponentLogoUrl: opponents.logoUrl, // Incluido por si se usa en la vista de edición
     })
     .from(games)
     .innerJoin(opponents, eq(games.opponentId, opponents.id))
@@ -328,7 +345,6 @@ export async function updateGame(
 ) {
   if (!id) throw new Error("ID de partido requerido.");
 
-  // 1. Buscar o crear rival si cambió el nombre
   let [opponent] = await db
     .select()
     .from(opponents)
@@ -342,7 +358,6 @@ export async function updateGame(
       .returning();
   }
 
-  // 2. Actualizar partido
   await db
     .update(games)
     .set({
@@ -391,6 +406,7 @@ export async function getGamesList() {
       freeThrows: games.freeThrows,
       notes: games.notes,
       opponentName: opponents.name,
+      opponentLogoUrl: opponents.logoUrl, // Útil para mostrar mini escudos en la lista general de partidos
     })
     .from(games)
     .innerJoin(opponents, eq(games.opponentId, opponents.id))
