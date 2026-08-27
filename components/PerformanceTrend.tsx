@@ -30,7 +30,6 @@ type MetricKey =
   | "twoPointers"
   | "freeThrows";
 
-// Todas las métricas disponibles para el gráfico, cada una con su color propio
 const ALL_METRICS: { key: MetricKey; label: string; color: string }[] = [
   { key: "rating", label: "Valoración", color: "#372D2E" },
   { key: "points", label: "Puntos", color: "#A8763E" },
@@ -43,19 +42,16 @@ const ALL_METRICS: { key: MetricKey; label: string; color: string }[] = [
   { key: "freeThrows", label: "T. Libres", color: "#B15A8C" },
 ];
 
-// Las mismas métricas (menos Puntos, que ya tiene protagonismo propio en el gráfico) para las cards de variación
 const SECONDARY_METRICS = ALL_METRICS.filter((m) => m.key !== "points");
+const MAX_SELECTED_METRICS = 2;
 
-const MAX_SELECTED_METRICS = 4; // tope para que el gráfico no se vuelva ilegible en mobile
-
-type PeriodKey = "last5" | "last10" | "month" | "year" | "all";
+type PeriodKey = "last5" | "last10" | "last20" | "all";
 
 const PERIODS: { key: PeriodKey; label: string }[] = [
   { key: "last5", label: "Últimos 5" },
   { key: "last10", label: "Últimos 10" },
-  { key: "month", label: "Este mes" },
-  { key: "year", label: "Este año" },
-  { key: "all", label: "Todos" },
+  { key: "last20", label: "Últimos 20" },
+  { key: "all", label: "Temporada" },
 ];
 
 function getMetricValue(game: GameWithOpponent, metric: MetricKey): number {
@@ -64,59 +60,51 @@ function getMetricValue(game: GameWithOpponent, metric: MetricKey): number {
   return game[metric] ?? 0;
 }
 
-function filterByPeriod(
+function sliceGamesByPeriod(
   games: GameWithOpponent[],
   period: PeriodKey,
 ): GameWithOpponent[] {
-  const now = new Date();
   switch (period) {
     case "last5":
       return games.slice(0, 5);
     case "last10":
       return games.slice(0, 10);
-    case "month":
-      return games.filter((g) => {
-        const d = new Date(g.date);
-        return (
-          d.getFullYear() === now.getFullYear() &&
-          d.getMonth() === now.getMonth()
-        );
-      });
-    case "year":
-      return games.filter(
-        (g) => new Date(g.date).getFullYear() === now.getFullYear(),
-      );
+    case "last20":
+      return games.slice(0, 20);
     case "all":
       return games;
   }
 }
 
 export default function PerformanceTrend({ games }: PerformanceTrendProps) {
+  // 1. Estados del Gráfico
   const [selectedMetrics, setSelectedMetrics] = useState<MetricKey[]>([
     "rating",
   ]);
-  const [period, setPeriod] = useState<PeriodKey>("last5");
+  const [chartPeriod, setChartPeriod] = useState<PeriodKey>("last5");
+
+  // 2. Estado del filtro para la 3ra Sección (Promedios y Tendencia)
+  const [summaryPeriod, setSummaryPeriod] = useState<PeriodKey>("all");
 
   const toggleMetric = (key: MetricKey) => {
     setSelectedMetrics((prev) => {
       if (prev.includes(key)) {
-        if (prev.length === 1) return prev; // siempre queda al menos 1 seleccionada
+        if (prev.length === 1) return prev;
         return prev.filter((k) => k !== key);
       }
-      if (prev.length >= MAX_SELECTED_METRICS) return prev; // tope alcanzado
+      if (prev.length >= MAX_SELECTED_METRICS) return [prev[1], key];
       return [...prev, key];
     });
   };
 
-  const periodGames = useMemo(
-    () => filterByPeriod(games, period),
-    [games, period],
+  // Datos para el gráfico
+  const chartGames = useMemo(
+    () => sliceGamesByPeriod(games, chartPeriod),
+    [games, chartPeriod],
   );
 
-  // El gráfico necesita orden cronológico ascendente (más viejo -> más nuevo).
-  // Cada fila trae el valor de TODAS las métricas; el gráfico solo dibuja las líneas seleccionadas.
   const chartData = useMemo(() => {
-    const chronological = [...periodGames].reverse();
+    const chronological = [...chartGames].reverse();
     return chronological.map((g) => {
       const row: Record<string, string | number> = {
         label: new Date(g.date).toLocaleDateString("es-AR", {
@@ -130,24 +118,68 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
       }
       return row;
     });
-  }, [periodGames]);
+  }, [chartGames]);
 
-  // Delta del último partido vs. el anteúltimo (siempre sobre el historial completo,
-  // independiente del filtro de período, para que las cards reflejen la variación más reciente)
-  const latestGame = games[0];
-  const previousGame = games[1];
+  // SECCIÓN 2: Cards Partido a Partido (Último vs. Anteúltimo)
+  const lastGameCards = useMemo(() => {
+    const latest = games[0];
+    const previous = games[1];
 
-  const secondaryCards = useMemo(() => {
     return SECONDARY_METRICS.map((m) => {
-      const current = latestGame ? getMetricValue(latestGame, m.key) : null;
-      const previous = previousGame
-        ? getMetricValue(previousGame, m.key)
-        : null;
-      const delta =
-        current !== null && previous !== null ? current - previous : null;
-      return { ...m, current, delta };
+      const current = latest ? getMetricValue(latest, m.key) : null;
+      const prev = previous ? getMetricValue(previous, m.key) : null;
+      const delta = current !== null && prev !== null ? current - prev : null;
+
+      return {
+        ...m,
+        current,
+        delta,
+      };
     });
-  }, [latestGame, previousGame]);
+  }, [games]);
+
+  // SECCIÓN 3: Promedios y Análisis de Tendencia según filtro elegido
+  const summaryData = useMemo(() => {
+    const targetGames = sliceGamesByPeriod(games, summaryPeriod);
+    if (targetGames.length === 0) return [];
+
+    return ALL_METRICS.map((m) => {
+      // Promedio general del bloque
+      const total = targetGames.reduce(
+        (acc, g) => acc + getMetricValue(g, m.key),
+        0,
+      );
+      const average = (total / targetGames.length).toFixed(1);
+
+      // Análisis de tendencia: dividimos la muestra en 2 mitades (recientes vs anteriores)
+      let trend: "up" | "down" | "neutral" = "neutral";
+
+      if (targetGames.length >= 2) {
+        const mid = Math.floor(targetGames.length / 2);
+        const recentHalf = targetGames.slice(0, mid);
+        const olderHalf = targetGames.slice(mid);
+
+        const recentAvg =
+          recentHalf.reduce((acc, g) => acc + getMetricValue(g, m.key), 0) /
+          recentHalf.length;
+        const olderAvg =
+          olderHalf.reduce((acc, g) => acc + getMetricValue(g, m.key), 0) /
+          olderHalf.length;
+
+        const diff = recentAvg - olderAvg;
+
+        // Umbral de sensibilidad para determinar si sube o baja
+        if (diff > 0.3) trend = "up";
+        else if (diff < -0.3) trend = "down";
+      }
+
+      return {
+        ...m,
+        average,
+        trend,
+      };
+    });
+  }, [games, summaryPeriod]);
 
   if (games.length === 0) {
     return (
@@ -158,51 +190,45 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Filtro de período */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
-        {PERIODS.map((p) => (
-          <button
-            key={p.key}
-            onClick={() => setPeriod(p.key)}
-            className={`shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition whitespace-nowrap border ${
-              period === p.key
-                ? "bg-[#372D2E] text-[#F5F1F0] border-[#372D2E] shadow-sm"
-                : "bg-[#DFD6CD]/60 text-[#372D2E]/80 border-[#DAD0C7] hover:bg-[#DFD6CD]"
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Gráfico principal (multi-métrica, hasta 4 en simultáneo) */}
+    <div className="space-y-6">
+      {/* 1. GRÁFICO TENDENCIA */}
       <div className="bg-[#DFD6CD]/60 p-4 rounded-3xl border border-[#DAD0C7] space-y-3">
-        <div className="flex items-center justify-between px-0.5">
-          <span className="text-[10px] font-bold text-[#372D2E]/60 uppercase tracking-wider">
-            Elegí hasta {MAX_SELECTED_METRICS} estadísticas
+        <div className="flex items-center justify-between">
+          <span className="font-bebas text-md text-[#372D2E] tracking-wider uppercase">
+            Evolución Gráfica
           </span>
           <span className="text-[10px] font-bold text-[#372D2E]/60">
-            {selectedMetrics.length}/{MAX_SELECTED_METRICS}
+            {selectedMetrics.length}/{MAX_SELECTED_METRICS} métricas
           </span>
+        </div>
+
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+          {PERIODS.map((p) => (
+            <button
+              key={p.key}
+              onClick={() => setChartPeriod(p.key)}
+              className={`shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition whitespace-nowrap border ${
+                chartPeriod === p.key
+                  ? "bg-[#372D2E] text-[#F5F1F0] border-[#372D2E] shadow-sm"
+                  : "bg-[#DFD6CD]/60 text-[#372D2E]/80 border-[#DAD0C7] hover:bg-[#DFD6CD]"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
         </div>
 
         <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
           {ALL_METRICS.map((m) => {
             const isSelected = selectedMetrics.includes(m.key);
-            const isDisabled =
-              !isSelected && selectedMetrics.length >= MAX_SELECTED_METRICS;
             return (
               <button
                 key={m.key}
                 onClick={() => toggleMetric(m.key)}
-                disabled={isDisabled}
                 className={`shrink-0 flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full transition whitespace-nowrap border ${
                   isSelected
                     ? "text-[#F5F1F0] border-transparent shadow-sm"
-                    : isDisabled
-                      ? "bg-[#DFD6CD]/30 text-[#372D2E]/30 border-[#DAD0C7]/50 cursor-not-allowed"
-                      : "bg-[#DFD6CD]/60 text-[#372D2E]/80 border-[#DAD0C7] hover:bg-[#DFD6CD]"
+                    : "bg-[#DFD6CD]/60 text-[#372D2E]/80 border-[#DAD0C7] hover:bg-[#DFD6CD]"
                 }`}
                 style={isSelected ? { backgroundColor: m.color } : undefined}
               >
@@ -218,83 +244,77 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
           })}
         </div>
 
-        {chartData.length === 0 ? (
-          <div className="h-40 flex items-center justify-center text-xs text-[#372D2E]/60 font-medium">
-            No hay partidos en este período.
-          </div>
-        ) : (
-          <div className="h-56">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={chartData}
-                margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#DAD0C7" />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 10, fill: "#372D2E" }}
-                  tickLine={false}
-                  axisLine={{ stroke: "#DAD0C7" }}
-                />
-                <YAxis
-                  tick={{ fontSize: 10, fill: "#372D2E" }}
-                  tickLine={false}
-                  axisLine={false}
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#372D2E",
-                    color: "#F5F1F0",
-                    fontSize: 12,
-                    borderRadius: 16,
-                    border: "none",
-                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                  }}
-                  itemStyle={{ color: "#DFD6CD" }}
-                  labelStyle={{ color: "#F5F1F0", fontWeight: "bold" }}
-                  labelFormatter={(label, payload) => {
-                    const opp = payload?.[0]?.payload?.opponent;
-                    return opp ? `${label} — vs ${opp}` : label;
-                  }}
-                  formatter={(value, name) => {
-                    const metricInfo = ALL_METRICS.find((m) => m.key === name);
-                    return [String(value), metricInfo?.label ?? String(name)];
-                  }}
-                />
-                {selectedMetrics.map((key) => {
-                  const metricInfo = ALL_METRICS.find((m) => m.key === key)!;
-                  return (
-                    <Line
-                      key={key}
-                      type="monotone"
-                      dataKey={key}
-                      name={key}
-                      stroke={metricInfo.color}
-                      strokeWidth={2.5}
-                      dot={{ r: 3, fill: metricInfo.color }}
-                      activeDot={{
-                        r: 5,
-                        fill: metricInfo.color,
-                        stroke: "#F5F1F0",
-                        strokeWidth: 2,
-                      }}
-                    />
-                  );
-                })}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+        <div className="h-52 pt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={chartData}
+              margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#DAD0C7" />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 10, fill: "#372D2E" }}
+                tickLine={false}
+                axisLine={{ stroke: "#DAD0C7" }}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: "#372D2E" }}
+                tickLine={false}
+                axisLine={false}
+                allowDecimals={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#372D2E",
+                  color: "#F5F1F0",
+                  fontSize: 12,
+                  borderRadius: 16,
+                  border: "none",
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                }}
+                itemStyle={{ color: "#DFD6CD" }}
+                labelStyle={{ color: "#F5F1F0", fontWeight: "bold" }}
+                labelFormatter={(label, payload) => {
+                  const opp = payload?.[0]?.payload?.opponent;
+                  return opp ? `${label} — vs ${opp}` : label;
+                }}
+                formatter={(value, name) => {
+                  const metricInfo = ALL_METRICS.find((m) => m.key === name);
+                  return [String(value), metricInfo?.label ?? String(name)];
+                }}
+              />
+              {selectedMetrics.map((key) => {
+                const metricInfo = ALL_METRICS.find((m) => m.key === key)!;
+                return (
+                  <Line
+                    key={key}
+                    type="monotone"
+                    dataKey={key}
+                    name={key}
+                    stroke={metricInfo.color}
+                    strokeWidth={2.5}
+                    dot={{ r: 3, fill: metricInfo.color }}
+                    activeDot={{
+                      r: 5,
+                      fill: metricInfo.color,
+                      stroke: "#F5F1F0",
+                      strokeWidth: 2,
+                    }}
+                  />
+                );
+              })}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      {/* Cards secundarias: valor del último partido + variación vs. el anteúltimo */}
-      <div>
-        <h3 className="text-[10px] font-bold text-[#372D2E]/60 uppercase tracking-wider mb-2 px-0.5">
-          Último partido vs. anterior
+      {/* 2. PARTIDO A PARTIDO (ÚLTIMO VS ANTEÚLTIMO) */}
+      <div className="space-y-2">
+        <h3 className="font-bebas text-md text-[#372D2E] tracking-wider uppercase px-0.5">
+          Último Partido vs. Anterior
         </h3>
         <div className="grid grid-cols-2 gap-2">
-          {secondaryCards.map((card) => (
+          {lastGameCards.map((card) => (
             <div
               key={card.key}
               className="bg-[#DFD6CD]/60 p-3 rounded-2xl border border-[#DAD0C7] flex items-center justify-between"
@@ -333,11 +353,67 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
             </div>
           ))}
         </div>
-        {!previousGame && (
-          <p className="text-[10px] text-[#372D2E]/50 mt-2 px-0.5">
-            Se necesitan al menos 2 partidos cargados para mostrar la variación.
-          </p>
-        )}
+      </div>
+
+      {/* 3. PROMEDIOS Y ANÁLISIS DE TENDENCIA */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-0.5">
+          <h3 className="font-bebas text-md text-[#372D2E] tracking-wider uppercase">
+            Promedios y Tendencia
+          </h3>
+        </div>
+
+        {/* Filtro para promedios */}
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+          {PERIODS.map((p) => (
+            <button
+              key={p.key}
+              onClick={() => setSummaryPeriod(p.key)}
+              className={`shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full transition whitespace-nowrap border ${
+                summaryPeriod === p.key
+                  ? "bg-[#372D2E] text-[#F5F1F0] border-[#372D2E] shadow-sm"
+                  : "bg-[#DFD6CD]/60 text-[#372D2E]/80 border-[#DAD0C7] hover:bg-[#DFD6CD]"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Cards de promedios con indicador de tendencia */}
+        <div className="grid grid-cols-3 gap-2">
+          {summaryData.map((item) => (
+            <div
+              key={item.key}
+              className="bg-[#DFD6CD]/60 p-2.5 rounded-2xl border border-[#DAD0C7] flex flex-col justify-between"
+            >
+              <div className="text-[9px] text-[#372D2E]/60 font-bold uppercase truncate mb-1">
+                {item.label}
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="font-bebas text-2xl text-[#372D2E] leading-none">
+                  {item.average}
+                </span>
+
+                {item.trend === "up" && (
+                  <span className="text-[10px] font-bold text-emerald-800 flex items-center gap-0.5">
+                    <TrendingUp className="w-3 h-3" />
+                  </span>
+                )}
+                {item.trend === "down" && (
+                  <span className="text-[10px] font-bold text-red-800 flex items-center gap-0.5">
+                    <TrendingDown className="w-3 h-3" />
+                  </span>
+                )}
+                {item.trend === "neutral" && (
+                  <span className="text-[10px] font-bold text-[#372D2E]/40 flex items-center gap-0.5">
+                    <Minus className="w-3 h-3" />
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

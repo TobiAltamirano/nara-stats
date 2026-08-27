@@ -16,6 +16,37 @@ import {
 interface OpponentOption {
   id: string;
   name: string;
+  logoUrl?: string | null;
+}
+
+// Mini componente para el escudo en el selector
+function OpponentLogo({
+  logoUrl,
+  name,
+}: {
+  logoUrl?: string | null;
+  name: string;
+}) {
+  const [hasError, setHasError] = useState(false);
+
+  if (!logoUrl || hasError) {
+    return (
+      <div className="w-6 h-6 bg-[#DAD0C7] rounded-lg flex items-center justify-center text-xs shrink-0 border border-[#DAD0C7]">
+        🆚
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-6 h-6 bg-[#F5F1F0] rounded-lg p-0.5 shrink-0 border border-[#DAD0C7] flex items-center justify-center overflow-hidden">
+      <img
+        src={logoUrl}
+        alt={name}
+        onError={() => setHasError(true)}
+        className="w-full h-full object-contain"
+      />
+    </div>
+  );
 }
 
 export default function NewGamePage() {
@@ -71,12 +102,20 @@ export default function NewGamePage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Helper para normalizar texto (elimina tildes y caracteres especiales)
+  const normalizeText = (text: string) =>
+    text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+
   // Smart Parser (Estilo WhatsApp)
   const parseWhatsAppMessage = (text: string) => {
     setRawText(text);
     if (!text.trim()) return;
 
     const lower = text.toLowerCase();
+    const normalizedRaw = normalizeText(text);
     const updates: Partial<typeof formData> = {};
 
     // 1. Extraer Marcador (ej: 72-65 o 72 - 65)
@@ -114,15 +153,39 @@ export default function NewGamePage() {
     const triMatch = lower.match(/(\d{1,2})\s*(?:triples|3pt|3p)/);
     if (triMatch) updates.threePointers = triMatch[1];
 
-    // 6. Detectar Rival
+    // 6. Detectar Rival y Buscar Coincidencia en la Lista Existente
     const vsMatch = text.match(
       /(?:contra|vs\.?|vsl)\s+([A-Za-zÁÉÍÓÚáéíóúÑñ\s]+?)(?:,|\.|$|\d)/i,
     );
-    if (vsMatch) {
-      const detectedName = vsMatch[1].trim();
-      if (detectedName.length > 2) {
-        updates.opponentName = detectedName;
+
+    let detectedName = vsMatch ? vsMatch[1].trim() : "";
+
+    // Si no lo encuentra por "contra/vs", busca si alguno de los rivales guardados se menciona en el texto
+    if (!detectedName && opponents.length > 0) {
+      const matchedOpponent = opponents.find((opp) =>
+        normalizedRaw.includes(normalizeText(opp.name)),
+      );
+      if (matchedOpponent) {
+        detectedName = matchedOpponent.name;
       }
+    }
+
+    if (detectedName.length > 2) {
+      const normalizedDetected = normalizeText(detectedName);
+
+      // Buscar coincidencia en la DB
+      const existingOpponent = opponents.find((opp) => {
+        const normOpp = normalizeText(opp.name);
+        return (
+          normOpp === normalizedDetected ||
+          normOpp.includes(normalizedDetected) ||
+          normalizedDetected.includes(normOpp)
+        );
+      });
+
+      updates.opponentName = existingOpponent
+        ? existingOpponent.name
+        : detectedName;
     }
 
     // 7. Detectar Localía
@@ -186,7 +249,12 @@ export default function NewGamePage() {
 
   // Filtrado de equipos existentes
   const filteredOpponents = opponents.filter((opp) =>
-    opp.name.toLowerCase().includes(formData.opponentName.toLowerCase()),
+    normalizeText(opp.name).includes(normalizeText(formData.opponentName)),
+  );
+
+  // Obtener objeto del rival seleccionado si existe
+  const selectedOpponentObj = opponents.find(
+    (opp) => normalizeText(opp.name) === normalizeText(formData.opponentName),
   );
 
   return (
@@ -269,7 +337,7 @@ export default function NewGamePage() {
           </div>
         </div>
 
-        {/* Rival (Selector Personalizado con Búsqueda) */}
+        {/* Rival (Selector Personalizado con Búsqueda y Logo) */}
         <div
           className="bg-[#DFD6CD]/60 p-3.5 rounded-2xl border border-[#DAD0C7]"
           ref={dropdownRef}
@@ -279,6 +347,15 @@ export default function NewGamePage() {
           </label>
           <div className="relative">
             <div className="relative flex items-center">
+              {/* Logo del rival seleccionado dentro del input */}
+              {selectedOpponentObj && (
+                <div className="absolute left-3 z-10 pointer-events-none flex items-center justify-center">
+                  <OpponentLogo
+                    logoUrl={selectedOpponentObj.logoUrl}
+                    name={selectedOpponentObj.name}
+                  />
+                </div>
+              )}
               <input
                 type="text"
                 value={formData.opponentName}
@@ -288,7 +365,9 @@ export default function NewGamePage() {
                   setIsDropdownOpen(true);
                 }}
                 placeholder="Buscar o escribir rival (Ej: Lanús)"
-                className="w-full bg-[#DFD6CD] border border-[#DAD0C7] text-[#372D2E] text-sm font-bold p-2.5 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#372D2E] placeholder-[#372D2E]/40"
+                className={`w-full bg-[#DFD6CD] border border-[#DAD0C7] text-[#372D2E] text-sm font-bold p-2.5 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#372D2E] placeholder-[#372D2E]/40 ${
+                  selectedOpponentObj ? "pl-12" : "pl-3"
+                }`}
                 required
               />
               <div className="absolute right-3 text-[#372D2E]/60 pointer-events-none">
@@ -296,7 +375,7 @@ export default function NewGamePage() {
               </div>
             </div>
 
-            {/* Menú Desplegable */}
+            {/* Menú Desplegable con Escudos */}
             {isDropdownOpen && (
               <div className="absolute z-20 left-0 right-0 mt-2 bg-[#F5F1F0] border border-[#DAD0C7] rounded-2xl shadow-lg max-h-48 overflow-y-auto p-1.5 space-y-1">
                 {filteredOpponents.length > 0 ? (
@@ -308,11 +387,14 @@ export default function NewGamePage() {
                         setFormData({ ...formData, opponentName: opp.name });
                         setIsDropdownOpen(false);
                       }}
-                      className="w-full text-left px-3 py-2 text-xs font-bold text-[#372D2E] hover:bg-[#DFD6CD] rounded-xl flex items-center justify-between transition"
+                      className="w-full text-left px-3 py-2 text-xs font-bold text-[#372D2E] hover:bg-[#DFD6CD] rounded-xl flex items-center justify-between transition gap-2"
                     >
-                      <span>{opp.name}</span>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <OpponentLogo logoUrl={opp.logoUrl} name={opp.name} />
+                        <span className="truncate">{opp.name}</span>
+                      </div>
                       {formData.opponentName === opp.name && (
-                        <Check className="w-3.5 h-3.5 text-[#372D2E]" />
+                        <Check className="w-3.5 h-3.5 text-[#372D2E] shrink-0" />
                       )}
                     </button>
                   ))
@@ -398,8 +480,8 @@ export default function NewGamePage() {
           >
             <span>
               {showAdvanced
-                ? "Ocultar Métrica Avanzada"
-                : "+ Agregar Rebotes, Asistencias, Triples..."}
+                ? "Ocultar Métricas Avanzadas"
+                : "+ Agregar Métricas Avanzadas"}
             </span>
             {showAdvanced ? (
               <ChevronUp className="w-4 h-4 text-[#372D2E]" />

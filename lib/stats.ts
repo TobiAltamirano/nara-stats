@@ -19,6 +19,7 @@ export interface DashboardStats {
     threePointers: number;
     twoPointers: number;
     freeThrows: number;
+    rating: number;
   };
   averages: {
     points: number;
@@ -89,6 +90,7 @@ export function calculateStats(gameList: Game[]): DashboardStats {
         threePointers: 0,
         twoPointers: 0,
         freeThrows: 0,
+        rating: 0,
       },
       averages: {
         points: 0,
@@ -216,6 +218,7 @@ export function calculateStats(gameList: Game[]): DashboardStats {
       threePointers: total3p,
       twoPointers: total2p,
       freeThrows: totalFt,
+      rating: totalRating,
     },
     averages: {
       points: ptsCount > 0 ? Number((totalPts / ptsCount).toFixed(1)) : 0,

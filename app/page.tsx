@@ -8,6 +8,7 @@ export const revalidate = 0;
 
 export default async function HomePage() {
   const { player, recentGames, allGames } = await getDashboardData();
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className="max-w-xl mx-auto p-4 space-y-6 pb-6">
@@ -16,7 +17,7 @@ export default async function HomePage() {
         <div className="flex justify-between items-start">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 bg-[#DFD6CD]/20 px-3 py-1 rounded-full text-[11px] font-semibold text-[#DFD6CD] tracking-wide">
-              <span>TEMPORADA 2026</span>
+              <span>TEMPORADA {currentYear}</span>
               <span>•</span>
               <span>PLATENSE</span>
             </div>

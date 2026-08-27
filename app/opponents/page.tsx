@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   getOpponentsWithRecord,
@@ -10,7 +10,17 @@ import {
 } from "@/app/actions";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import Toast from "@/components/ui/Toast";
-import { Users, ChevronRight, Plus, Edit2, Trash2 } from "lucide-react";
+import {
+  Users,
+  ChevronRight,
+  Plus,
+  Edit2,
+  Trash2,
+  Search,
+  X,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
 interface Opponent {
   id: string;
@@ -55,6 +65,10 @@ export default function OpponentsPage() {
   const [opponents, setOpponents] = useState<Opponent[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Buscador y desplegable
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
   // Alta
   const [newOpponentName, setNewOpponentName] = useState("");
   const [newOpponentLogo, setNewOpponentLogo] = useState("");
@@ -88,6 +102,14 @@ export default function OpponentsPage() {
     loadOpponents();
   }, []);
 
+  // Filtrado reactivo según la búsqueda
+  const filteredOpponents = useMemo(() => {
+    if (!searchQuery.trim()) return opponents;
+    return opponents.filter((opp) =>
+      opp.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [opponents, searchQuery]);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newOpponentName.trim()) return;
@@ -97,6 +119,7 @@ export default function OpponentsPage() {
       await createOpponent(newOpponentName, newOpponentLogo);
       setNewOpponentName("");
       setNewOpponentLogo("");
+      setIsFormOpen(false); // Cierra el acordeón al agregar
       setToast({ message: "Rival agregado con éxito", type: "success" });
       await loadOpponents();
     } catch (err: any) {
@@ -150,7 +173,7 @@ export default function OpponentsPage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-4 space-y-6 pb-6">
+    <div className="max-w-xl mx-auto p-4 space-y-4 pb-6">
       {toast && (
         <Toast
           message={toast.message}
@@ -185,51 +208,109 @@ export default function OpponentsPage() {
         </div>
       </div>
 
-      {/* Alta rápida de rival */}
-      <form
-        onSubmit={handleCreate}
-        className="flex flex-col gap-2 bg-[#DFD6CD]/60 p-2.5 rounded-3xl border border-[#DAD0C7]"
-      >
+      {/* Buscador & Botón Desplegable de Agregar */}
+      <div className="space-y-2">
         <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Nombre del rival..."
-            value={newOpponentName}
-            onChange={(e) => setNewOpponentName(e.target.value)}
-            className="flex-1 bg-[#F5F1F0] px-4 py-2 rounded-2xl border border-[#DAD0C7] text-sm text-[#372D2E] placeholder-[#372D2E]/40 focus:outline-none focus:ring-2 focus:ring-[#372D2E]"
-          />
+          {/* Campo de búsqueda */}
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-[#372D2E]/50 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Buscar rival..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#DFD6CD]/60 pl-9 pr-8 py-2.5 rounded-2xl border border-[#DAD0C7] text-sm text-[#372D2E] placeholder-[#372D2E]/50 focus:outline-none focus:ring-2 focus:ring-[#372D2E] font-medium"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#372D2E]/50 hover:text-[#372D2E]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Botón para abrir/cerrar el formulario de alta */}
           <button
-            type="submit"
-            disabled={creating || !newOpponentName.trim()}
-            className="bg-[#372D2E] text-[#F5F1F0] px-4 rounded-2xl font-bold text-xs flex items-center gap-1.5 hover:bg-[#372D2E]/90 transition disabled:opacity-50 shrink-0"
+            onClick={() => setIsFormOpen(!isFormOpen)}
+            className="bg-[#372D2E] text-[#F5F1F0] px-4 rounded-2xl text-xs font-bold flex items-center gap-1.5 hover:bg-[#372D2E]/90 transition shrink-0"
           >
-            <Plus className="w-4 h-4" /> Agregar
+            <Plus
+              className={`w-4 h-4 transition-transform ${isFormOpen ? "rotate-45" : ""}`}
+            />
+            <span>Nuevo</span>
+            {isFormOpen ? (
+              <ChevronUp className="w-3.5 h-3.5 opacity-60" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+            )}
           </button>
         </div>
-        <input
-          type="url"
-          placeholder="URL del escudo (opcional)..."
-          value={newOpponentLogo}
-          onChange={(e) => setNewOpponentLogo(e.target.value)}
-          className="bg-[#F5F1F0] px-4 py-1.5 rounded-xl border border-[#DAD0C7] text-xs text-[#372D2E] placeholder-[#372D2E]/40 focus:outline-none focus:ring-2 focus:ring-[#372D2E]"
-        />
-      </form>
+
+        {/* Formulario de Alta Desplegable */}
+        {isFormOpen && (
+          <form
+            onSubmit={handleCreate}
+            className="bg-[#DFD6CD]/80 p-3.5 rounded-3xl border border-[#DAD0C7] space-y-2.5 animate-fade-in"
+          >
+            <span className="text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wider block px-1">
+              Agregar nuevo rival
+            </span>
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                placeholder="Nombre del rival (ej: Boca Juniors)..."
+                value={newOpponentName}
+                onChange={(e) => setNewOpponentName(e.target.value)}
+                className="bg-[#F5F1F0] px-4 py-2 rounded-xl border border-[#DAD0C7] text-sm text-[#372D2E] placeholder-[#372D2E]/40 focus:outline-none focus:ring-2 focus:ring-[#372D2E]"
+                autoFocus
+              />
+              <input
+                type="url"
+                placeholder="URL del escudo (opcional)..."
+                value={newOpponentLogo}
+                onChange={(e) => setNewOpponentLogo(e.target.value)}
+                className="bg-[#F5F1F0] px-4 py-2 rounded-xl border border-[#DAD0C7] text-xs text-[#372D2E] placeholder-[#372D2E]/40 focus:outline-none focus:ring-2 focus:ring-[#372D2E]"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsFormOpen(false)}
+                className="px-3 py-1.5 text-xs font-bold text-[#372D2E]/70 hover:text-[#372D2E]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={creating || !newOpponentName.trim()}
+                className="bg-[#372D2E] text-[#F5F1F0] px-4 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 hover:bg-[#372D2E]/90 transition disabled:opacity-50"
+              >
+                {creating ? "Guardando..." : "Guardar Rival"}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
 
       {/* Listado de rivales */}
       {loading ? (
         <div className="text-center py-10 text-xs text-[#372D2E]/60 font-medium">
           Cargando rivales...
         </div>
-      ) : opponents.length === 0 ? (
+      ) : filteredOpponents.length === 0 ? (
         <div className="bg-[#DAD0C7]/40 p-8 rounded-3xl border border-dashed border-[#DAD0C7] text-center space-y-2">
           <Users className="w-8 h-8 text-[#372D2E]/40 mx-auto" />
           <p className="text-sm font-bold text-[#372D2E]">
-            Aún no hay rivales registrados.
+            {searchQuery
+              ? `No se encontraron rivales que coincidan con "${searchQuery}"`
+              : "Aún no hay rivales registrados."}
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {opponents.map((opp) => (
+        <div className="space-y-2.5">
+          {filteredOpponents.map((opp) => (
             <div
               key={opp.id}
               className="bg-[#DFD6CD]/60 p-4 rounded-3xl border border-[#DAD0C7] transition"
@@ -315,7 +396,7 @@ export default function OpponentsPage() {
                     </button>
                     <button
                       onClick={() => setDeletingId(opp.id)}
-                      className="p-2 text-[#AF0203] hover:text-[#AF0203]/70 hover:bg-[#AF0203] rounded-full transition"
+                      className="p-2 text-[#AF0203] hover:text-[#DAD0C7]/70 hover:bg-[#AF0203] rounded-full transition"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

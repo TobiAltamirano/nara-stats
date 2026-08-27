@@ -56,91 +56,91 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
         </div>
       </div>
 
-      {/* BLOQUE 2: Performance de Nara */}
+      {/* BLOQUE 2: Performance de Nara (Totales Acumulados) */}
       <div className="space-y-2">
         <div>
           <h2 className="font-bebas text-xl text-[#372D2E] tracking-wider uppercase flex items-center gap-1.5 px-1">
-            <Award className="w-4 h-4 text-[#372D2E]" /> Performance
+            <Award className="w-4 h-4 text-[#372D2E]" /> Estadísticas Acumuladas
           </h2>
         </div>
 
-        {/* Promedios clave (Tarjeta Oscura Hero) */}
+        {/* Totales clave (Tarjeta Oscura Hero) */}
         <div className="grid grid-cols-4 gap-2 bg-[#372D2E] text-[#F5F1F0] p-4 rounded-3xl text-center shadow-sm">
-          <div title="Puntos por Partido">
+          <div title="Total de Puntos">
             <div className="font-bebas text-3xl text-[#DFD6CD] leading-none">
-              {stats.averages.points}
+              {stats.totals.points}
             </div>
             <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
-              Puntos/PJ
+              Pts Totales
             </div>
           </div>
-          <div title="Rebotes por Partido">
+          <div title="Total de Dobles">
             <div className="font-bebas text-3xl text-[#F5F1F0] leading-none">
-              {stats.averages.rebounds}
+              {stats.totals.twoPointers}
             </div>
             <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
-              Rebotes/PJ
+              Dobles
             </div>
           </div>
-          <div title="Asistencias por Partido">
+          <div title="Total de Triples">
             <div className="font-bebas text-3xl text-[#F5F1F0] leading-none">
-              {stats.averages.assists}
+              {stats.totals.threePointers}
             </div>
             <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
-              Asistencias/PJ
+              Triples
             </div>
           </div>
-          <div title="Valoración / Eficiencia por Partido">
+          <div title="Valoración Total Acumulada">
             <div className="font-bebas text-3xl text-[#DFD6CD] leading-none">
-              {stats.averages.rating}
+              {stats.totals.rating}
             </div>
             <div className="text-[9px] text-[#F5F1F0]/70 font-bold uppercase mt-1">
-              Valoración/PJ
+              Valoración
             </div>
           </div>
         </div>
 
-        {/* Promedios secundarios */}
+        {/* Totales secundarios */}
         <div className="grid grid-cols-4 gap-2 bg-[#DFD6CD]/60 p-3.5 rounded-3xl border border-[#DAD0C7] text-center">
-          <div title="Robos de Balón por Partido">
+          <div title="Total de Robos">
             <div className="font-bebas text-xl text-[#372D2E]">
-              {stats.averages.steals}
+              {stats.totals.steals}
             </div>
             <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
-              Robos/PJ
+              Robos
             </div>
           </div>
-          <div title="Pérdidas de Balón por Partido">
+          <div title="Total de Pérdidas">
             <div className="font-bebas text-xl text-[#372D2E]">
-              {stats.averages.turnovers}
+              {stats.totals.turnovers}
             </div>
             <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
-              Pérdidas/PJ
+              Pérdidas
             </div>
           </div>
-          <div title="Dobles Convertidos por Partido">
+          <div title="Total de Rebotes">
             <div className="font-bebas text-xl text-[#372D2E]">
-              {stats.averages.twoPointers}
+              {stats.totals.rebounds}
             </div>
             <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
-              Dobles/PJ
+              Rebotes
             </div>
           </div>
-          <div title="Tiros Libres Convertidos por Partido">
+          <div title="Total de Asistencias">
             <div className="font-bebas text-xl text-[#372D2E]">
-              {stats.averages.freeThrows}
+              {stats.totals.assists}
             </div>
             <div className="text-[9px] text-[#372D2E]/70 font-bold uppercase">
-              Tiros Libres/PJ
+              Asistencias
             </div>
           </div>
         </div>
 
-        {/* Totales y Récords secundarios (4 Tarjetas) */}
-        <div className="grid grid-cols-2 xs:grid-cols-4 sm:grid-cols-4 gap-2">
-          <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
+        {/* Hitos y Triples */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-[#DAD0C7]/80 p-3 rounded-2xl border border-[#DAD0C7] text-center">
             <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
-              Máx. Puntos /PJ
+              Máx. Puntos / PJ
             </span>
             <span className="font-bebas text-xl text-[#372D2E]">
               {stats.records.maxPoints}{" "}
@@ -148,31 +148,12 @@ export default function DashboardStats({ games }: DashboardStatsProps) {
             </span>
           </div>
 
-          <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
+          <div className="bg-[#DAD0C7]/80 p-3 rounded-2xl border border-[#DAD0C7] text-center">
             <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
-              Dobles Totales
+              Tiros Libes Totales
             </span>
             <span className="font-bebas text-xl text-[#372D2E]">
-              {stats.totals.twoPointers} 🏀
-            </span>
-          </div>
-
-          <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
-            <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
-              Triples Totales
-            </span>
-            <span className="font-bebas text-xl text-[#372D2E]">
-              {stats.totals.threePointers} 🎯
-            </span>
-          </div>
-
-          <div className="bg-[#DAD0C7]/50 p-3 rounded-2xl border border-[#DAD0C7] text-center">
-            <span className="text-[10px] text-[#372D2E]/70 font-bold block uppercase">
-              Total Puntos
-            </span>
-            <span className="font-bebas text-xl text-[#372D2E]">
-              {stats.totals.points}{" "}
-              <span className="text-xs font-sans">PTS</span>
+              {stats.totals.freeThrows} 🎯
             </span>
           </div>
         </div>

@@ -106,7 +106,7 @@ export default function GamesPage() {
               Partidos
             </h1>
             <p className="text-xs text-[#DFD6CD]/80 font-medium mt-0.5">
-              Historial de la temporada activa
+              Historial completo de las temporadas
             </p>
           </div>
         </div>

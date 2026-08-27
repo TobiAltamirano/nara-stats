@@ -19,7 +19,7 @@ export default async function PerformancePage() {
             Desempeño
           </h1>
           <p className="text-xs text-[#DFD6CD]/80 font-medium mt-0.5">
-            Evolución de las estadísticas de Nara, partido a partido
+            Evolución de las estadísticas, partido a partido
           </p>
         </div>
       </div>

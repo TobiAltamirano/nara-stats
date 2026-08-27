@@ -71,7 +71,7 @@ export default function ConfirmModal({
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className={`flex-1 py-2.5 px-3 rounded-2xl text-xs font-bebas tracking-wider text-[#F5F1F0] transition disabled:opacity-50 uppercase shadow-sm ${
+            className={`flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold tracking-wider text-[#F5F1F0] transition disabled:opacity-50 uppercase shadow-sm ${
               isDanger
                 ? "bg-red-600 hover:bg-red-700"
                 : "bg-[#372D2E] hover:opacity-90"
