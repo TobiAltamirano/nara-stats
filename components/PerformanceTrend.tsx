@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { calculateRating, type Game } from "@/lib/stats";
+import { formatShortDate } from "@/utils/formDate";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 type GameWithOpponent = Game & { opponent: { id: string; name: string } };
@@ -107,10 +108,7 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
     const chronological = [...chartGames].reverse();
     return chronological.map((g) => {
       const row: Record<string, string | number> = {
-        label: new Date(g.date).toLocaleDateString("es-AR", {
-          day: "2-digit",
-          month: "2-digit",
-        }),
+        label: formatShortDate(g.date),
         opponent: g.opponent?.name ?? "Rival",
       };
       for (const m of ALL_METRICS) {
@@ -168,7 +166,6 @@ export default function PerformanceTrend({ games }: PerformanceTrendProps) {
 
         const diff = recentAvg - olderAvg;
 
-        // Umbral de sensibilidad para determinar si sube o baja
         if (diff > 0.3) trend = "up";
         else if (diff < -0.3) trend = "down";
       }

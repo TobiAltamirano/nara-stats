@@ -7,6 +7,7 @@ import ConfirmModal from "@/components/ui/ConfirmModal";
 import Toast from "@/components/ui/Toast";
 import { Calendar, Plus } from "lucide-react";
 import Link from "next/link";
+import { formatDate } from "@/utils/formDate";
 
 export default function GamesPage() {
   const [gamesList, setGamesList] = useState<any[]>([]);
@@ -49,25 +50,32 @@ export default function GamesPage() {
     }
   };
 
+  // Extrae el año directamente de la cadena sanitizada "YYYY-MM-DD"
+  const getGameYear = (dateStr: string | Date): number => {
+    const cleanDate = formatDate(dateStr);
+    const year = Number(cleanDate.split("-")[0]);
+    return isNaN(year) ? new Date().getFullYear() : year;
+  };
+
   // Temporadas (años) disponibles, de más reciente a más vieja
   const seasons = useMemo(() => {
     const years = new Set<number>();
-    for (const g of gamesList) years.add(new Date(g.date).getFullYear());
+    for (const g of gamesList) {
+      years.add(getGameYear(g.date));
+    }
     return Array.from(years).sort((a, b) => b - a);
   }, [gamesList]);
 
   const filteredGames = useMemo(() => {
     if (selectedYear === "all") return gamesList;
-    return gamesList.filter(
-      (g) => new Date(g.date).getFullYear() === selectedYear,
-    );
+    return gamesList.filter((g) => getGameYear(g.date) === selectedYear);
   }, [gamesList, selectedYear]);
 
   // Agrupar los partidos filtrados por temporada, manteniendo el orden desc por fecha dentro de cada grupo
   const groupedBySeason = useMemo(() => {
     const groups = new Map<number, typeof filteredGames>();
     for (const g of filteredGames) {
-      const year = new Date(g.date).getFullYear();
+      const year = getGameYear(g.date);
       if (!groups.has(year)) groups.set(year, []);
       groups.get(year)!.push(g);
     }

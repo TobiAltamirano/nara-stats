@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createGame, getOpponentsList } from "@/app/actions";
 import Toast from "@/components/ui/Toast";
+import { getTodayInputDate } from "@/utils/formDate";
 import {
   ArrowLeft,
   Zap,
@@ -19,7 +21,6 @@ interface OpponentOption {
   logoUrl?: string | null;
 }
 
-// Mini componente para el escudo en el selector
 function OpponentLogo({
   logoUrl,
   name,
@@ -38,12 +39,13 @@ function OpponentLogo({
   }
 
   return (
-    <div className="w-6 h-6 bg-[#F5F1F0] rounded-lg p-0.5 shrink-0 border border-[#DAD0C7] flex items-center justify-center overflow-hidden">
-      <img
+    <div className="w-6 h-6 bg-[#F5F1F0] rounded-lg p-0.5 shrink-0 border border-[#DAD0C7] flex items-center justify-center overflow-hidden relative">
+      <Image
         src={logoUrl}
         alt={name}
         onError={() => setHasError(true)}
-        className="w-full h-full object-contain"
+        fill
+        className="object-contain p-0.5"
       />
     </div>
   );
@@ -56,7 +58,6 @@ export default function NewGamePage() {
   const [rawText, setRawText] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Estado para el combobox custom de rivales
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -65,9 +66,8 @@ export default function NewGamePage() {
     type: "success" | "error";
   } | null>(null);
 
-  // Estado del formulario
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split("T")[0],
+    date: getTodayInputDate(),
     opponentName: "",
     location: "home" as "home" | "away",
     teamScore: "",
@@ -83,12 +83,10 @@ export default function NewGamePage() {
     notes: "",
   });
 
-  // Cargar lista de rivales para autocompletado
   useEffect(() => {
     getOpponentsList().then(setOpponents);
   }, []);
 
-  // Cerrar el desplegable si se hace click fuera del componente
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -102,14 +100,12 @@ export default function NewGamePage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Helper para normalizar texto (elimina tildes y caracteres especiales)
   const normalizeText = (text: string) =>
     text
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
 
-  // Smart Parser (Estilo WhatsApp)
   const parseWhatsAppMessage = (text: string) => {
     setRawText(text);
     if (!text.trim()) return;
@@ -118,7 +114,6 @@ export default function NewGamePage() {
     const normalizedRaw = normalizeText(text);
     const updates: Partial<typeof formData> = {};
 
-    // 1. Extraer Marcador (ej: 72-65 o 72 - 65)
     const scoreMatch = text.match(/(\d{2,3})\s*[-aA]\s*(\d{2,3})/);
     if (scoreMatch) {
       const score1 = parseInt(scoreMatch[1]);
@@ -133,7 +128,6 @@ export default function NewGamePage() {
       }
     }
 
-    // 2. Extraer Puntos de Nara
     const ptsMatch =
       lower.match(/(?:nara\s*(?:hizo|anotó)?\s*)?(\d{1,2})\s*(?:pts|puntos)/) ||
       lower.match(/hizo\s*(\d{1,2})/);
@@ -141,26 +135,21 @@ export default function NewGamePage() {
       updates.playerPoints = ptsMatch[1];
     }
 
-    // 3. Extraer Rebotes
     const rebMatch = lower.match(/(\d{1,2})\s*(?:reb|rebotes)/);
     if (rebMatch) updates.rebounds = rebMatch[1];
 
-    // 4. Extraer Asistencias
     const astMatch = lower.match(/(\d{1,2})\s*(?:ast|asistencias)/);
     if (astMatch) updates.assists = astMatch[1];
 
-    // 5. Extraer Triples
     const triMatch = lower.match(/(\d{1,2})\s*(?:triples|3pt|3p)/);
     if (triMatch) updates.threePointers = triMatch[1];
 
-    // 6. Detectar Rival y Buscar Coincidencia en la Lista Existente
     const vsMatch = text.match(
       /(?:contra|vs\.?|vsl)\s+([A-Za-zÁÉÍÓÚáéíóúÑñ\s]+?)(?:,|\.|$|\d)/i,
     );
 
     let detectedName = vsMatch ? vsMatch[1].trim() : "";
 
-    // Si no lo encuentra por "contra/vs", busca si alguno de los rivales guardados se menciona en el texto
     if (!detectedName && opponents.length > 0) {
       const matchedOpponent = opponents.find((opp) =>
         normalizedRaw.includes(normalizeText(opp.name)),
@@ -173,7 +162,6 @@ export default function NewGamePage() {
     if (detectedName.length > 2) {
       const normalizedDetected = normalizeText(detectedName);
 
-      // Buscar coincidencia en la DB
       const existingOpponent = opponents.find((opp) => {
         const normOpp = normalizeText(opp.name);
         return (
@@ -188,7 +176,6 @@ export default function NewGamePage() {
         : detectedName;
     }
 
-    // 7. Detectar Localía
     if (lower.includes("visitante") || lower.includes("de visitante")) {
       updates.location = "away";
     } else if (lower.includes("local") || lower.includes("de local")) {
@@ -247,12 +234,10 @@ export default function NewGamePage() {
     }
   };
 
-  // Filtrado de equipos existentes
   const filteredOpponents = opponents.filter((opp) =>
     normalizeText(opp.name).includes(normalizeText(formData.opponentName)),
   );
 
-  // Obtener objeto del rival seleccionado si existe
   const selectedOpponentObj = opponents.find(
     (opp) => normalizeText(opp.name) === normalizeText(formData.opponentName),
   );
@@ -337,7 +322,7 @@ export default function NewGamePage() {
           </div>
         </div>
 
-        {/* Rival (Selector Personalizado con Búsqueda y Logo) */}
+        {/* Rival */}
         <div
           className="bg-[#DFD6CD]/60 p-3.5 rounded-2xl border border-[#DAD0C7]"
           ref={dropdownRef}
@@ -347,7 +332,6 @@ export default function NewGamePage() {
           </label>
           <div className="relative">
             <div className="relative flex items-center">
-              {/* Logo del rival seleccionado dentro del input */}
               {selectedOpponentObj && (
                 <div className="absolute left-3 z-10 pointer-events-none flex items-center justify-center">
                   <OpponentLogo
@@ -375,7 +359,6 @@ export default function NewGamePage() {
               </div>
             </div>
 
-            {/* Menú Desplegable con Escudos */}
             {isDropdownOpen && (
               <div className="absolute z-20 left-0 right-0 mt-2 bg-[#F5F1F0] border border-[#DAD0C7] rounded-2xl shadow-lg max-h-48 overflow-y-auto p-1.5 space-y-1">
                 {filteredOpponents.length > 0 ? (

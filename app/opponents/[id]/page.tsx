@@ -1,5 +1,6 @@
 import { getOpponentDetail } from "@/app/actions";
 import { calculateRating } from "@/lib/stats";
+import { formatDateDisplay } from "@/utils/formDate";
 import { Trophy, Award, ArrowLeft, BarChart3 } from "lucide-react";
 import Link from "next/link";
 
@@ -198,7 +199,7 @@ export default async function OpponentDetailPage({
               >
                 <div className="space-y-1">
                   <div className="text-[10px] font-bold text-[#372D2E]/70 uppercase tracking-wide">
-                    {new Date(g.date).toLocaleDateString("es-AR")} —{" "}
+                    {formatDateDisplay(g.date)} —{" "}
                     {g.location === "home" ? "🏠 Local" : "✈️ Visitante"}
                   </div>
                   <div className="flex items-center gap-2">

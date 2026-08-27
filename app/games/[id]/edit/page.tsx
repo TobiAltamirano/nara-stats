@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getGameById, updateGame, getOpponentsList } from "@/app/actions";
 import Toast from "@/components/ui/Toast";
 import { ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
+import { formatDate } from "@/utils/formDate";
 
 export default function EditGamePage({
   params,
@@ -51,7 +52,7 @@ export default function EditGamePage({
         ]);
         setOpponents(opps);
         setFormData({
-          date: game.date,
+          date: formatDate(game.date), // Normalizamos a "YYYY-MM-DD" para el input date
           opponentName: game.opponentName,
           location: game.location as "home" | "away",
           teamScore: game.teamScore.toString(),
@@ -90,7 +91,7 @@ export default function EditGamePage({
     try {
       await updateGame(id, {
         opponentName: formData.opponentName,
-        date: formData.date,
+        date: formatDate(formData.date),
         location: formData.location,
         teamScore: parseInt(formData.teamScore),
         opponentScore: parseInt(formData.opponentScore),

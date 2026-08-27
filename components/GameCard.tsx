@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { calculateRating } from "@/lib/stats";
 import { ChevronDown, ChevronUp, Edit2, Trash2 } from "lucide-react";
+import { formatDateDisplay } from "@/utils/formDate";
 
 interface GameCardProps {
   game: {
@@ -37,7 +38,7 @@ export default function GameCard({ game, onDeleteRequest }: GameCardProps) {
       <div className="p-4 flex items-center justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-[10px] text-[#372D2E]/70 font-semibold tracking-wide">
-            <span>{new Date(game.date).toLocaleDateString("es-AR")}</span>
+            <span>{formatDateDisplay(game.date)}</span>
             <span>•</span>
             <span className="uppercase font-bold">
               {game.location === "home" ? "🏠 Local" : "✈️ Visitante"}
